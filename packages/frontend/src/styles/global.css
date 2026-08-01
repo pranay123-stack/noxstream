@@ -313,39 +313,126 @@ select {
   line-height: 1.55;
 }
 
+/* ---------- how it works ---------- */
+
 /*
- * The idea, made visible before the user scrolls: a REAL handle read from
- * NoxPayrollRegistry on the left, and what it takes to turn it into a number
- * on the right. No sample values — if the roster is empty this strip does not
- * render at all rather than invent one.
+ * Three lines for someone who has never heard of Nox, then the proof that they
+ * are true. This is the only block on the page whose job is narrative, so it
+ * sits between the hero and the tabs and is deliberately quiet: numbered
+ * markers, no card chrome competing with the real cards below.
+ *
+ * The proof footer carries a REAL handle read from NoxPayrollRegistry. No
+ * sample values — if the roster is empty that footer does not render at all
+ * rather than invent one.
  */
-.heroproof {
+.howto {
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  margin-top: 4px;
-  padding: 13px 16px;
-  max-width: 760px;
+  gap: 16px;
+  padding: 20px clamp(16px, 2.4vw, 24px);
   border: 1px solid var(--line);
-  border-left: 3px solid var(--cipher);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   background: var(--surface);
   box-shadow: var(--shadow);
 }
-.heroproof-row {
+.howto-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 18px;
+}
+.howto-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  min-width: 0;
+}
+.howto-num {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.howto-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.howto-copy strong {
+  font-weight: 620;
+  letter-spacing: -0.012em;
+  line-height: 1.35;
+}
+.howto-proof {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding-top: 15px;
+  border-top: 1px solid var(--line);
+}
+.howto-proof-row {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
   min-width: 0;
 }
-.heroproof-out {
+.howto-proof-out {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   font-size: 0.82rem;
   color: var(--plain);
   font-weight: 560;
+}
+
+/* ---------- technical-details disclosure ---------- */
+
+/*
+ * Plumbing a judge should be able to reach but never has to read. Closed by
+ * default and visually recessive — it must not compete with the headline
+ * numbers above it, and it must not look like a disabled control either.
+ */
+.tech {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+}
+.tech-summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  list-style: none;
+  user-select: none;
+  border-radius: var(--radius);
+}
+.tech-summary::-webkit-details-marker { display: none; }
+.tech-summary:hover { color: var(--text); }
+.tech-chevron {
+  flex: none;
+  color: var(--text-faint);
+  transition: transform 160ms ease;
+}
+.tech[open] .tech-chevron { transform: rotate(90deg); }
+.tech-hint { margin-left: auto; text-align: right; }
+.tech-body {
+  padding: 4px 14px 15px;
 }
 
 /* ---------- inline notice ---------- */
@@ -698,6 +785,16 @@ select {
   cursor: pointer;
 }
 .chip-locked:hover { border-color: var(--text-faint); color: var(--text); }
+/* The no-wallet outcome. Not a button, because there is no account to check an
+   access list against yet — a control here would be one that cannot work. */
+.cvalue-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
 .cvalue-note {
   background: none;
   border: 0;
@@ -740,6 +837,14 @@ select {
   word-break: break-word;
 }
 .tile-note { font-size: 0.74rem; color: var(--text-faint); }
+/* The exact technical name for whatever the label just said in English. It sits
+   under the label, one step quieter — demoted, never deleted. */
+.tile-term {
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  margin-top: -4px;
+  overflow-wrap: anywhere;
+}
 
 /* ---------- table ---------- */
 
@@ -767,6 +872,17 @@ table.data th {
   background: var(--surface-strong);
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
+}
+/* Plain-English column name on top, exact term underneath in lower case — a
+   judge reads the first line, an engineer reads the second. */
+.th-term {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--text-faint);
 }
 table.data td {
   padding: 12px 14px;

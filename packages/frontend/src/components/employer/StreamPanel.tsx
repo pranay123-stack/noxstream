@@ -21,6 +21,7 @@ import {
   Card,
   CardBody,
   CardHead,
+  Disclosure,
   Field,
   Input,
   Tile,
@@ -114,11 +115,13 @@ export function StreamPanel({
     parsedAmount !== null && allowance < parsedAmount && !amountError;
   const streamOpen = (protocol.streamId ?? 0n) > 0n;
 
+  const vaultSymbol = protocol.confidentialSymbol ?? `c${symbol}`;
+
   return (
     <Card>
       <CardHead
-        title="Aggregate stream"
-        sub="Public on purpose — one ordinary Sablier stream, one recipient, fully composable."
+        title="The public stream that funds everyone"
+        sub="Deliberately public: one ordinary Sablier stream paying one recipient. The company total is auditable and composable — the split between employees is what stays private."
         action={
           protocol.protocolTag ? (
             <Badge>{protocol.protocolTag}</Badge>
@@ -138,39 +141,46 @@ export function StreamPanel({
           </Callout>
         )}
 
+        {protocol.ready && !protocol.hasStarted && (
+          <Callout tone="warn" title="The payroll clock has not been started yet">
+            Salaries can be written to the registry, but nothing accrues until
+            the employer calls <span className="mono">start()</span> once. Nothing
+            is lost — the clock simply has not begun.
+          </Callout>
+        )}
+
         <div className="grid-3">
           <Tile
-            label="Held by the stream"
-            value={
-              protocol.adapterBalance === undefined
-                ? "—"
-                : formatAmount(protocol.adapterBalance, decimals)
-            }
-            note={`${symbol} locked or unharvested`}
-          />
-          <Tile
-            label="Unlocked, unharvested"
+            label="Unlocked, ready to move"
+            term="adapter.withdrawableAmount()"
             value={
               protocol.withdrawable === undefined
                 ? "—"
                 : formatAmount(protocol.withdrawable, decimals)
             }
-            note="Anyone can push this into the vault"
+            note={
+              protocol.withdrawable === 0n
+                ? `No ${symbol} has unlocked since the last move — the stream releases funds gradually.`
+                : `${symbol} the stream has released. Anyone can move it into the private vault.`
+            }
           />
           <Tile
-            label="In the confidential vault"
+            label="Available to pay salaries"
+            term={`${vaultSymbol} vault balance`}
             value={
               protocol.vaultBalance === undefined
                 ? "—"
                 : formatAmount(protocol.vaultBalance, decimals)
             }
-            note={`Wrapped as ${protocol.confidentialSymbol ?? `c${symbol}`}`}
+            note={
+              protocol.vaultBalance === 0n
+                ? `Nothing moved in yet — claims wait until someone runs the move below.`
+                : `${symbol} held privately as ${vaultSymbol}; claims are paid from here.`
+            }
           />
-        </div>
-
-        <div className="grid-3">
           <Tile
-            label="Sablier stream"
+            label="The stream itself"
+            term="Sablier Lockup"
             value={
               streamOpen ? (
                 protocol.lockupAddress ? (
@@ -188,41 +198,20 @@ export function StreamPanel({
                   `#${protocol.streamId}`
                 )
               ) : (
-                "none"
+                "none yet"
               )
             }
-            note={streamOpen ? "Verify it independently on Lockup" : undefined}
-          />
-          <Tile
-            label="Payroll clock"
-            value={protocol.hasStarted ? "running" : "not started"}
             note={
-              protocol.hasStarted
-                ? `since ${formatTimestamp(protocol.startedAt)}`
-                : "accrual begins at start()"
-            }
-          />
-          <Tile
-            label="Adapter fee tank"
-            value={
-              protocol.feeTank === undefined
-                ? "—"
-                : `${Number(formatEther(protocol.feeTank)).toFixed(5)} ETH`
-            }
-            note={
-              protocol.minHarvestFee === undefined
-                ? "Sablier charges a fee per withdrawal"
-                : `${Number(formatEther(protocol.minHarvestFee)).toFixed(6)} ETH per harvest`
-            }
-            badge={
-              protocol.canHarvest ? undefined : <Badge tone="warn">empty</Badge>
+              streamOpen
+                ? "Verify it yourself on Sablier — it is an ordinary stream and does not know NoxStream exists."
+                : "No stream has been funded yet."
             }
           />
         </div>
 
         {isEmployer && !streamOpen && protocol.adapterReadable && (
           <div className="stack-sm">
-            <span className="eyebrow">Fund the aggregate stream</span>
+            <span className="eyebrow">Open the stream that funds payroll</span>
             <div className="grid-2">
               <Field
                 label={`Total ${symbol}`}
@@ -349,13 +338,62 @@ export function StreamPanel({
           {isEmployer && !protocol.hasStarted && (
             <span className="tiny faint">
               Accrual is zero until this is called, and it can only be called
-              once.
+              once. <span className="mono">payroll.start()</span>
             </span>
           )}
         </div>
         <TxNote flow={startTx} label="Start" />
 
         <HarvestControls protocol={protocol} />
+
+        <Disclosure
+          summary="Technical details"
+          hint="fee tank, adapter balance, accrual clock"
+        >
+          <div className="grid-3">
+            <Tile
+              label="Gas for payouts"
+              term="adapter fee tank"
+              value={
+                protocol.feeTank === undefined
+                  ? "—"
+                  : `${Number(formatEther(protocol.feeTank)).toFixed(5)} ETH`
+              }
+              note={
+                protocol.minHarvestFee === undefined
+                  ? "Sablier charges a native-token fee every time funds are pulled out of the stream. The adapter keeps ETH on hand to pay it; anyone may top it up."
+                  : `Sablier charges ${Number(formatEther(protocol.minHarvestFee)).toFixed(6)} ETH each time funds are pulled out of the stream. The adapter keeps ETH on hand to pay it; anyone may top it up.`
+              }
+              badge={
+                protocol.canHarvest ? undefined : <Badge tone="warn">empty</Badge>
+              }
+            />
+            <Tile
+              label="Sitting in the adapter contract"
+              term={`${symbol}.balanceOf(adapter)`}
+              value={
+                protocol.adapterBalance === undefined
+                  ? "—"
+                  : formatAmount(protocol.adapterBalance, decimals)
+              }
+              note={
+                protocol.adapterBalance === 0n
+                  ? "Zero is the healthy state: a move forwards everything into the vault in the same transaction, so this contract never sits on funds."
+                  : `${symbol} withdrawn from the stream but not yet forwarded into the vault.`
+              }
+            />
+            <Tile
+              label="Accrual clock"
+              term="payroll.startedAt()"
+              value={protocol.hasStarted ? "running" : "not started"}
+              note={
+                protocol.hasStarted
+                  ? `Salaries have been building up since ${formatTimestamp(protocol.startedAt)}.`
+                  : "Nothing accrues until the employer calls start() once."
+              }
+            />
+          </div>
+        </Disclosure>
       </CardBody>
     </Card>
   );

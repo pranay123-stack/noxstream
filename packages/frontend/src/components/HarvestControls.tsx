@@ -62,12 +62,12 @@ export function HarvestControls({
               })
           }
         >
-          Harvest into the vault
+          Move unlocked funds into the private vault
         </Button>
         {!compact && (
           <span className="tiny faint">
-            <span className="mono">harvest()</span> is permissionless — employees
-            never depend on the employer being online.
+            Anyone may do this — an employee never has to wait for the employer
+            to be online. <span className="mono">harvest() is permissionless.</span>
           </span>
         )}
       </div>
@@ -75,7 +75,7 @@ export function HarvestControls({
       {tankShort && (
         <Callout
           tone="warn"
-          title="Harvest unavailable: the stream adapter is out of gas fees"
+          title="Can't move funds: the adapter has run out of ETH for the withdrawal fee"
           action={
             <Button
               size="sm"
@@ -111,8 +111,8 @@ export function HarvestControls({
         </Callout>
       )}
 
-      <TxNote flow={topUpTx} label="Fee tank top-up" />
-      <TxNote flow={harvestTx} label="Harvest" />
+      <TxNote flow={topUpTx} label="Fee top-up" />
+      <TxNote flow={harvestTx} label="Move into the vault" />
     </div>
   );
 }

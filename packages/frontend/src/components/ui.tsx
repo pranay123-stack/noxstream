@@ -6,7 +6,14 @@ import {
   type TextareaHTMLAttributes,
 } from "react";
 import { TARGET_NETWORK } from "@shared/nox";
-import { AlertIcon, CheckIcon, CopyIcon, ExternalIcon, InfoIcon } from "./icons";
+import {
+  AlertIcon,
+  CheckIcon,
+  ChevronIcon,
+  CopyIcon,
+  ExternalIcon,
+  InfoIcon,
+} from "./icons";
 
 /* ---------------------------------------------------------------- button */
 
@@ -208,11 +215,18 @@ export function Tile({
   value,
   note,
   badge,
+  term,
 }: {
   label: ReactNode;
   value: ReactNode;
   note?: ReactNode;
   badge?: ReactNode;
+  /**
+   * The precise technical name for whatever `label` says in plain words. Shown
+   * smaller and underneath — demoted, never deleted, so a judge reads the
+   * sentence and an engineer still gets the exact term.
+   */
+  term?: ReactNode;
 }) {
   return (
     <div className="tile">
@@ -220,9 +234,39 @@ export function Tile({
         {label}
         {badge}
       </span>
+      {term && <span className="tile-term mono">{term}</span>}
       <span className="tile-value">{value}</span>
       {note && <span className="tile-note">{note}</span>}
     </div>
+  );
+}
+
+/* -------------------------------------------------------------- disclosure */
+
+/**
+ * Plumbing that a judge should be able to reach but should not have to wade
+ * through. Native `<details>` so it keeps keyboard and screen-reader behaviour
+ * for free, and so the content is genuinely in the DOM rather than hidden by a
+ * flag someone has to trust.
+ */
+export function Disclosure({
+  summary,
+  hint,
+  children,
+}: {
+  summary: ReactNode;
+  hint?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <details className="tech">
+      <summary className="tech-summary">
+        <ChevronIcon size={12} className="tech-chevron" />
+        <span>{summary}</span>
+        {hint && <span className="tiny faint tech-hint">{hint}</span>}
+      </summary>
+      <div className="tech-body">{children}</div>
+    </details>
   );
 }
 

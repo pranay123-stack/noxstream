@@ -113,12 +113,12 @@ export function AllocationComposer({
 
   const steps: Array<{ label: string; state: StepState; detail?: string }> = [
     {
-      label: "Compose the roster",
+      label: "Type the salaries",
       state: stage === "compose" ? "active" : "done",
       detail: `${valid.length} row${valid.length === 1 ? "" : "s"}`,
     },
     {
-      label: "Encrypt each salary into a handle",
+      label: "Encrypt each one into a handle, in this browser",
       state: encryption.isRunning
         ? "active"
         : encryption.isComplete
@@ -131,7 +131,7 @@ export function AllocationComposer({
         : undefined,
     },
     {
-      label: "Submit one batched transaction",
+      label: "Send them all in one transaction",
       state:
         tx.stage === "confirmed"
           ? "done"
@@ -152,8 +152,8 @@ export function AllocationComposer({
   return (
     <Card>
       <CardHead
-        title="Encrypt and submit allocations"
-        sub="Salaries are encrypted in your browser. The registry only ever sees handles."
+        title="Set the salaries"
+        sub="You type a real number; it is encrypted here in your browser and leaves as a pointer. The on-chain registry never sees an amount."
         action={
           <div className="tabs" role="tablist">
             <button
@@ -374,8 +374,8 @@ export function AllocationComposer({
             {encryption.rows.length > 0
               ? "Re-encrypt"
               : valid.length === 0
-                ? "Encrypt allocations"
-                : `Encrypt ${valid.length} allocation${valid.length === 1 ? "" : "s"}`}
+                ? "Encrypt these salaries"
+                : `Encrypt ${valid.length} salar${valid.length === 1 ? "y" : "ies"}`}
           </Button>
           {encryption.rows.length > 0 && (
             <Button
@@ -385,7 +385,7 @@ export function AllocationComposer({
                 tx.reset();
               }}
             >
-              Discard handles
+              Discard
             </Button>
           )}
         </div>
@@ -400,9 +400,9 @@ export function AllocationComposer({
 
         {encryption.isComplete && (
           <div className="stack-sm">
-            <Callout tone="ok" title="Every salary is now a handle">
-              The plaintext never leaves this browser. Each handle is bound to the
-              registry at{" "}
+            <Callout tone="ok" title="Every salary is now an encrypted pointer">
+              The real numbers never left this browser. Each pointer is locked to
+              the registry at{" "}
               <span className="mono tiny">{shortAddress(registry ?? "0x")}</span> —
               it cannot be replayed against another contract.
             </Callout>
@@ -413,8 +413,8 @@ export function AllocationComposer({
                 loading={tx.isBusy}
                 disabled={!registry}
               >
-                Submit {encryption.rows.length} allocation
-                {encryption.rows.length === 1 ? "" : "s"} in one transaction
+                Send {encryption.rows.length} salar
+                {encryption.rows.length === 1 ? "y" : "ies"} in one transaction
               </Button>
               {tx.stage === "awaiting-signature" && (
                 <span className="small muted">Confirm in your wallet…</span>
@@ -433,11 +433,11 @@ export function AllocationComposer({
         )}
 
         {tx.stage === "confirmed" && tx.hash && (
-          <Callout tone="ok" title="Roster submitted">
+          <Callout tone="ok" title="Salaries submitted">
             <div className="stack-sm">
               <span>
-                One transaction, {encryption.rows.length} salaries, zero amounts on
-                the wire.
+                One transaction, {encryption.rows.length} salaries, and not a
+                single amount anywhere in it.
               </span>
               <ExplorerLink hash={tx.hash} />
             </div>
@@ -459,14 +459,17 @@ function EncryptionReveal({
 }) {
   return (
     <div className="stack-sm">
-      <span className="eyebrow">Plaintext in, ciphertext out</span>
+      <span className="eyebrow">Real number in, encrypted pointer out</span>
       <div className="tablewrap">
         <table className="data">
           <thead>
             <tr>
               <th>Employee</th>
               <th style={{ width: "26%" }}>What you typed</th>
-              <th>What the chain will store</th>
+              <th>
+                What the chain will store
+                <span className="th-term mono">euint256 handle</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -516,8 +519,8 @@ function EncryptionReveal({
         </table>
       </div>
       <KeyValue
-        k="Total plaintext bytes sent on-chain"
-        v="0 — only handles and their proofs"
+        k="Salary amounts sent on-chain"
+        v="0 bytes — only pointers and their proofs"
       />
     </div>
   );

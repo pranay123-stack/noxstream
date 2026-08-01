@@ -55,12 +55,12 @@ const REVERT_COPY: Record<string, { title: string; detail: string }> = {
   VaultUnfunded: {
     title: "The vault has nothing to pay out yet",
     detail:
-      "Funds have unlocked in the public stream but nobody has harvested them into the confidential vault. harvest() is permissionless — you can call it yourself, right here, without the employer.",
+      "Money has unlocked in the public stream, but nobody has moved it into the private vault yet. Anyone may do that, including you, right here, without waiting for the employer. harvest() is permissionless.",
   },
   NothingToHarvest: {
     title: "Nothing unlocked yet",
     detail:
-      "The aggregate stream has no unclaimed balance right now. Wait for more of it to unlock, then harvest again.",
+      "The public stream has released nothing since the last time funds were moved. It unlocks gradually — wait a moment and try again.",
   },
   ArrayLengthMismatch: {
     title: "Batch arrays do not line up",
@@ -93,16 +93,16 @@ const REVERT_COPY: Record<string, { title: string; detail: string }> = {
   StreamAlreadyOpen: {
     title: "A stream is already open",
     detail:
-      "NoxStream funds exactly one aggregate stream. Harvest the current one before opening another.",
+      "NoxStream funds exactly one public stream. Drain the current one before opening another.",
   },
   NoStream: {
     title: "No stream has been funded",
-    detail: "Fund the aggregate stream first — there is nothing to harvest.",
+    detail: "Open and fund the public stream first — there is nothing to move yet.",
   },
   InsufficientFeeTank: {
-    title: "The stream adapter is out of gas fees",
+    title: "The adapter has run out of ETH for the withdrawal fee",
     detail:
-      "Sablier charges a small native-token fee on every withdrawal, and the adapter's ETH tank cannot cover the next one. Anyone can top it up — the adapter's receive() is open, so an employee is never blocked on the employer here.",
+      "Sablier charges a small fee in ETH every time funds are pulled out of the stream, and the adapter cannot cover the next one. Anyone may refill it — the adapter's receive() is open, so an employee is never blocked on the employer here.",
   },
   ZeroDuration: {
     title: "Stream duration must be greater than zero",
@@ -114,9 +114,9 @@ const REVERT_COPY: Record<string, { title: string; detail: string }> = {
       "Sablier stores deposits as uint128. Split the funding into smaller streams.",
   },
   UnauthorizedDestination: {
-    title: "Harvest destination is not the vault",
+    title: "Funds can only be moved into the NoxStream vault",
     detail:
-      "The adapter only ever pushes funds to the NoxStream vault it was deployed with. That constraint is what keeps a permissionless harvest safe.",
+      "The adapter only ever pushes funds to the vault it was deployed with. That single constraint is what makes letting anyone move them safe.",
   },
   EthTransferFailed: {
     title: "ETH transfer failed",
@@ -162,9 +162,9 @@ export function describeError(error: unknown): FriendlyError {
   if (/not authorized to decrypt|does not exist or user/i.test(raw)) {
     return {
       kind: "unauthorised",
-      title: "This account is not authorised to decrypt that value",
+      title: "This account was never given permission to read that value",
       detail:
-        "Nox checked the on-chain access list and your address is not on it. That is the system working correctly: the handle is public, the number behind it is not. Only the employer and the employee that value belongs to hold a grant.",
+        "Nox checked its on-chain access list and this address is not on it. That is the system working correctly: the pointer is public, the number behind it is not. Only the employer and the employee the value belongs to are granted access.",
       raw,
       expected: true,
     };

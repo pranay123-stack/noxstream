@@ -121,6 +121,12 @@ export const ArrowRightIcon = (p: IconProps) => (
   </Icon>
 );
 
+export const ChevronIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M9 5.5 16 12l-7 6.5" />
+  </Icon>
+);
+
 export const UploadIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M12 16V4.5" />

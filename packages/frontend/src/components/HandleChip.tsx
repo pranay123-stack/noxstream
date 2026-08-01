@@ -29,7 +29,10 @@ export function HandleChip({
 
   if (isZeroHandle(handle)) {
     return (
-      <span className="cipher cipher-zero" title="No ciphertext has been written here yet">
+      <span
+        className="cipher cipher-zero"
+        title="Nothing has been written here yet — the stored pointer is all zeroes"
+      >
         <LockIcon size={12} className="cipher-lock" />
         <span className="cipher-text">not set</span>
       </span>
@@ -65,8 +68,9 @@ export function HandleChip({
             </span>
           )}
           <span className="tiny faint">
-            Public structure, private value. Anyone can read these bytes; nobody
-            without an ACL grant can read the number behind them.
+            Anyone can read these bytes off the chain. Nobody can read the number
+            behind them without being granted access to it first.
+            <span className="mono"> Public structure, private value.</span>
           </span>
         </span>
       )}

@@ -1,21 +1,14 @@
 import { useState } from "react";
 import { useAccount, useSwitchChain } from "wagmi";
-import { TARGET_NETWORK, isZeroHandle } from "@shared/nox";
-import { HandleChip } from "@/components/HandleChip";
+import { TARGET_NETWORK } from "@shared/nox";
+import { HowItWorks } from "@/components/HowItWorks";
 import { Masthead } from "@/components/Masthead";
 import { NotDeployed } from "@/components/NotDeployed";
 import { Badge, Button, Callout } from "@/components/ui";
-import {
-  ArrowRightIcon,
-  EyeIcon,
-  LockIcon,
-  StreamIcon,
-  UnlockIcon,
-} from "@/components/icons";
+import { EyeIcon, LockIcon, StreamIcon } from "@/components/icons";
 import { deployment } from "@/config/deployments";
 import { hasWalletConnect, targetChain } from "@/config/wagmi";
 import { useProtocol } from "@/hooks/useProtocol";
-import { useRoster } from "@/hooks/useRoster";
 import { useHandleClient } from "@/nox/HandleClientProvider";
 import { EmployeeView } from "@/views/EmployeeView";
 import { EmployerView } from "@/views/EmployerView";
@@ -41,22 +34,24 @@ export function App() {
           </span>
           <h1>Payroll that streams in public and pays in private.</h1>
           <p className="hero-lede">
-            One ordinary Sablier stream funds the company in the open; every
-            salary inside it exists on-chain only as a 32-byte encrypted handle.
+            A company funds one ordinary Sablier stream in the open. What each
+            person inside it earns is encrypted — the chain stores a pointer,
+            not an amount, and only the people you allow can read it.
           </p>
           <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
             <Badge>
-              <StreamIcon size={11} /> aggregate total: public
+              <StreamIcon size={11} /> company total: public
             </Badge>
             <Badge>
-              <EyeIcon size={11} /> roster membership: public
+              <EyeIcon size={11} /> who is employed: public
             </Badge>
             <Badge tone="cipher">
-              <LockIcon size={11} /> every salary: ciphertext
+              <LockIcon size={11} /> what each person earns: encrypted
             </Badge>
           </div>
-          <HeroProof />
         </section>
+
+        <HowItWorks />
 
         <div className="stack">
           {wrongNetwork && (
@@ -91,23 +86,30 @@ export function App() {
           ) : (
             <div className="stack">
               <div className="row-between">
-                <div className="tabs" role="tablist" aria-label="Role">
-                  <button
-                    className="tab"
-                    role="tab"
-                    aria-selected={role === "employer"}
-                    onClick={() => setRole("employer")}
-                  >
-                    Employer
-                  </button>
-                  <button
-                    className="tab"
-                    role="tab"
-                    aria-selected={role === "employee"}
-                    onClick={() => setRole("employee")}
-                  >
-                    Employee
-                  </button>
+                <div className="row" style={{ gap: 14 }}>
+                  <div className="tabs" role="tablist" aria-label="Role">
+                    <button
+                      className="tab"
+                      role="tab"
+                      aria-selected={role === "employer"}
+                      onClick={() => setRole("employer")}
+                    >
+                      Employer
+                    </button>
+                    <button
+                      className="tab"
+                      role="tab"
+                      aria-selected={role === "employee"}
+                      onClick={() => setRole("employee")}
+                    >
+                      Employee
+                    </button>
+                  </div>
+                  <span className="small muted">
+                    {role === "employer"
+                      ? "What the company sees — and what the public sees instead."
+                      : "What one employee sees about their own pay."}
+                  </span>
                 </div>
                 <span className="tiny faint mono">
                   {deployment.source === "env"
@@ -134,41 +136,6 @@ export function App() {
 }
 
 /**
- * The whole idea in one line, using a REAL handle read from
- * `NoxPayrollRegistry.ratePerSecondOf` on Sepolia — not a sample. If the roster
- * is empty there is nothing honest to show, so the strip does not render;
- * inventing a handle here would undercut the one claim the app is making.
- */
-function HeroProof() {
-  const roster = useRoster();
-  const sample = roster.rows.find(
-    (row) => row.rateHandle && !isZeroHandle(row.rateHandle),
-  );
-  if (!sample?.rateHandle) return null;
-
-  return (
-    <div className="heroproof">
-      <span className="eyebrow">
-        One employee&apos;s salary, exactly as Sepolia stores it
-      </span>
-      <div className="heroproof-row">
-        <HandleChip handle={sample.rateHandle} />
-        <ArrowRightIcon size={14} className="cvalue-arrow" />
-        <span className="heroproof-out">
-          <UnlockIcon size={12} />a real number — but only for an account
-          NoxCompute authorised
-        </span>
-      </div>
-      <span className="tiny faint">
-        Read live from <span className="mono">ratePerSecondOf()</span>. Scroll
-        down and the roster shows the same thing per row: the handle every
-        observer gets, next to the plaintext only a grant-holder can obtain.
-      </span>
-    </div>
-  );
-}
-
-/**
  * A slim strip, not a card. Everything below it is genuinely readable without a
  * wallet — which is the demonstration — so this should inform, not gate. A card
  * here reads as a blocker and pushes the actual product below the fold.
@@ -178,16 +145,12 @@ function ConnectPrompt() {
     <div className="notice">
       <LockIcon size={13} />
       <span className="small">
-        Read-only right now. Everything below is public chain data —{" "}
-        <strong>no wallet needed to see it</strong>. Connect one to decrypt the
-        rows you have been granted access to.
+        You are looking at live Sepolia data with{" "}
+        <strong>no wallet connected</strong> — which is exactly the observer's
+        view. Connect one and any value you were granted access to becomes a
+        number.
         {!hasWalletConnect && (
-          <span className="faint">
-            {" "}
-            Browser-extension wallets only in this build; set{" "}
-            <span className="mono tiny">VITE_WALLETCONNECT_PROJECT_ID</span> for QR
-            pairing.
-          </span>
+          <span className="faint"> Browser-extension wallets only in this build.</span>
         )}
       </span>
     </div>
@@ -207,9 +170,10 @@ function Footer() {
         public — deliberately, and stated here rather than implied away. Claim
         timing is mitigated by epoch batching, not eliminated.
       </p>
-      <p className="tiny faint mono">
-        NoxCompute {TARGET_NETWORK.noxComputeAddress} · gateway{" "}
-        {TARGET_NETWORK.handleGatewayUrl}
+      <p className="tiny faint">
+        Nox access-control contract{" "}
+        <span className="mono">{TARGET_NETWORK.noxComputeAddress}</span> · handle
+        gateway <span className="mono">{TARGET_NETWORK.handleGatewayUrl}</span>
       </p>
     </footer>
   );

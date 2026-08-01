@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 import { isZeroHandle, type Handle } from "@shared/nox";
 import { SECONDS_PER_MONTH } from "@shared/types";
 import { DECRYPT_STAGE_LABEL, useDecryption } from "@/nox/DecryptionProvider";
@@ -41,6 +42,7 @@ export function ConfidentialValue({
   auto?: boolean;
 }) {
   const { entryFor, request } = useDecryption();
+  const { isConnected } = useAccount();
   const entry = entryFor(handle);
 
   useEffect(() => {
@@ -65,6 +67,7 @@ export function ConfidentialValue({
           decimals={decimals}
           symbol={symbol}
           kind={kind}
+          connected={isConnected}
           onRetry={() => void request(handle)}
         />
       </span>
@@ -78,6 +81,7 @@ function Outcome({
   decimals,
   symbol,
   kind,
+  connected,
   onRetry,
 }: {
   entry: ReturnType<ReturnType<typeof useDecryption>["entryFor"]>;
@@ -85,6 +89,7 @@ function Outcome({
   decimals: number;
   symbol: string;
   kind: ValueKind;
+  connected: boolean;
   onRetry: () => void;
 }) {
   switch (entry.stage) {
@@ -133,6 +138,17 @@ function Outcome({
       );
 
     default:
+      // No wallet means no account to check the on-chain access list against,
+      // so offering a "Decrypt" button here would be a button that cannot do
+      // anything. Say what is actually true instead.
+      if (!connected) {
+        return (
+          <span className="cvalue-locked" title="Connect a wallet to check whether it may read this value">
+            <LockIcon size={11} />
+            Only its owner can read this
+          </span>
+        );
+      }
       return (
         <span>
           <Button size="sm" variant="ghost" onClick={onRetry}>
@@ -176,11 +192,11 @@ function DecryptedValue({
       </span>
       <button
         type="button"
-        className="tiny mono cvalue-note"
+        className="tiny cvalue-note"
         onClick={() => setShowSource((v) => !v)}
         title="Where this number came from"
       >
-        {showSource ? "hide source" : "decrypted from handle"}
+        {showSource ? "hide" : "where did this number come from?"}
       </button>
       {showSource && (
         <span className="stack-sm" style={{ gap: 4 }}>
@@ -191,9 +207,13 @@ function DecryptedValue({
             </span>
           )}
           <span className="tiny faint">
-            Returned by <span className="mono">handleClient.decrypt()</span> after
-            your EIP-712 signature — gasless, and only because NoxCompute lists
-            this account as a viewer.
+            You signed a message proving you own this account — no gas, no
+            transaction — and the enclave returned the number. It worked only
+            because this account was granted read access to this exact value.
+            <span className="mono">
+              {" "}
+              handleClient.decrypt() over EIP-712.
+            </span>
           </span>
         </span>
       )}
@@ -215,10 +235,15 @@ export function NotAuthorised() {
         Not authorised
       </button>
       {open && (
-        <span className="tiny faint" style={{ maxWidth: 320, display: "block" }}>
-          NoxCompute's access list does not include this account for this handle,
-          so no decryption was attempted and no signature was requested. That is
-          the system working: the handle is public, the number is not.
+        <span className="tiny faint" style={{ maxWidth: 340, display: "block" }}>
+          This account was never given permission to read this salary, so no
+          decryption was attempted and your wallet was not asked to sign
+          anything. That is the system working: the pointer is public, the number
+          is not.
+          <span className="mono">
+            {" "}
+            NoxCompute.isViewer(handle, you) returned false.
+          </span>
         </span>
       )}
     </>
