@@ -1,0 +1,68 @@
+name: Deploy frontend to GitHub Pages
+
+# The NoxStream UI is a static SPA that talks directly to Sepolia and to the Nox
+# handle gateway from the browser. There is no server component, so Pages is a
+# faithful host: the deployed site is the same app a judge gets from `npm run dev`,
+# reading the same committed deployment record.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/frontend/**"
+      - "packages/shared/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two Pages deploys race; drop superseded runs rather than queueing.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # `.npmrc` sets ignore-scripts=true — @sablier/evm-utils' postinstall
+      # aborts a clean install. See the root .npmrc for the full reason.
+      - name: Install
+        run: npm install --no-audit --no-fund
+
+      - name: Build frontend
+        env:
+          PAGES_BASE: /noxstream/
+          # Optional. Absent is fine: the app then offers browser-injected
+          # wallets only, rather than advertising WalletConnect pairing it
+          # cannot actually establish.
+          VITE_WALLETCONNECT_PROJECT_ID: ${{ secrets.VITE_WALLETCONNECT_PROJECT_ID }}
+        run: npm run build --workspace @noxstream/frontend
+
+      # Pages serves 404.html for unknown paths. Copying index.html there keeps
+      # a hard refresh working even though the app is currently single-page.
+      - name: SPA fallback
+        run: cp packages/frontend/dist/index.html packages/frontend/dist/404.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: packages/frontend/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

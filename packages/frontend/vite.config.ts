@@ -6,6 +6,13 @@ const here = fileURLToPath(new URL(".", import.meta.url));
 const monorepoRoot = fileURLToPath(new URL("../..", import.meta.url));
 
 export default defineConfig({
+  /**
+   * GitHub Pages serves the site from `/<repo>/`, not from the domain root, so
+   * asset URLs need that prefix. It is injected by CI (`PAGES_BASE`) rather
+   * than hardcoded, because setting it unconditionally would also move the
+   * local dev server to `/noxstream/` and break `npm run dev` for everyone.
+   */
+  base: process.env.PAGES_BASE ?? "/",
   plugins: [react()],
   resolve: {
     alias: {
