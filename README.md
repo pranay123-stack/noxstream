@@ -10,6 +10,10 @@ NoxStream exists; everything that composes with it keeps working.
 
 One public stream in. N encrypted salaries out.
 
+**▶ Live app: https://pranay123-stack.github.io/noxstream/** — connect a Sepolia
+wallet and flip the public/private toggle. It reads the live contracts listed below;
+nothing is simulated. A browser wallet (MetaMask or similar) is all you need.
+
 ---
 
 ## Status
@@ -20,6 +24,7 @@ One public stream in. N encrypted salaries out.
 | Sablier fork tier | **5 passing** against real, unmodified Sablier Lockup v4.0 bytecode on a Sepolia fork |
 | `npm run typecheck` / `npm run compile` | clean across all 3 workspaces; solc 0.8.35, optimizer + viaIR |
 | Sepolia deployment | **LIVE** — 5 contracts, see [Live addresses](#live-addresses) |
+| Hosted UI | **LIVE** — [pranay123-stack.github.io/noxstream](https://pranay123-stack.github.io/noxstream/), deployed from `main` by [pages.yml](.github/workflows/pages.yml) |
 | Live Sepolia e2e (`test/integration/e2e-sepolia.test.ts`) | **8 passing** against the live deployment — real Sablier stream, real confidential claim, leak proof clean |
 
 Nothing in this README reports a result that was not observed. Where something has
