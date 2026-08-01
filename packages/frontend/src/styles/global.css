@@ -196,22 +196,66 @@ select {
   background: color-mix(in srgb, var(--bg) 78%, transparent);
   border-bottom: 1px solid var(--line);
 }
+/*
+ * Three equal zones so the switch lands on the TRUE optical centre of the page,
+ * not merely between two items of unequal width. `1fr auto 1fr` would centre it
+ * against the brand and the wallet button, which are different widths — the
+ * switch would drift. Equal columns keep it pinned no matter how long the
+ * connected address or network-warning label gets.
+ */
 .masthead-inner {
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 13px clamp(16px, 4vw, 32px);
-  display: flex;
+  padding: 12px clamp(16px, 4vw, 32px);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  flex-wrap: wrap;
+  gap: 16px;
 }
+.masthead-center {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+.masthead-end {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+/* Below ~860px there is not enough room for three zones; stack the switch onto
+   its own full-width row so it stays tappable instead of being squeezed. */
+@media (max-width: 860px) {
+  .masthead-inner {
+    grid-template-columns: 1fr auto;
+    row-gap: 10px;
+  }
+  .masthead-center {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .masthead-center .viewswitch {
+    width: 100%;
+  }
+}
+
 .brand {
   display: flex;
   align-items: center;
   gap: 11px;
   min-width: 0;
+}
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+/* The wordmark carries the identity; the tagline is repeated by the h1 two
+   lines below, so it is the first thing to go when space is tight. */
+@media (max-width: 560px) {
+  .brand-sub { display: none; }
 }
 .brand-mark {
   width: 30px;
@@ -234,6 +278,82 @@ select {
   font-size: 0.72rem;
   color: var(--text-faint);
   letter-spacing: 0.01em;
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 44px 0 30px;
+}
+/* Two lines on a wide screen, never three. A display heading that wraps three
+   times stops reading as a statement and starts reading as a paragraph. */
+.hero h1 {
+  max-width: 26ch;
+  text-wrap: balance;
+}
+/*
+ * ~62 characters. Long-form prose wants 65-75ch, but this sits under a large
+ * display heading, and a lede that runs wider than the headline it supports
+ * reads as a wall rather than a subtitle.
+ */
+.hero-lede {
+  max-width: 58ch;
+  color: var(--text-dim);
+  font-size: 1.02rem;
+  line-height: 1.55;
+}
+
+/* ---------- inline notice ---------- */
+
+/*
+ * For information that should be READ but not obeyed. Deliberately NOT boxed:
+ * the mode caption directly above it already carries an accent rule, and two
+ * stacked accent bars read as two warnings competing for the same attention.
+ * This one is connective tissue, so it is plain text with a quiet icon.
+ */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 2px 2px 2px 13px;
+  color: var(--text-faint);
+  max-width: 84ch;
+}
+.notice > svg {
+  flex: none;
+  margin-top: 3px;
+  opacity: 0.65;
+}
+.notice strong {
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+/* The mode explainer reads as a caption for the data beneath it, so it is
+   keyed to whichever mode is active rather than sitting in neutral chrome. */
+.mode-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  /* Caps the measure at a readable ~85 characters. Left to fill the 1180px
+     shell, small text runs past 160 characters per line and the eye loses the
+     return sweep. */
+  max-width: 88ch;
+  border: 1px solid var(--line);
+  background: var(--surface-2, transparent);
+}
+:root[data-mode="public"] .mode-note {
+  border-left: 2px solid var(--cipher);
+}
+:root[data-mode="private"] .mode-note {
+  border-left: 2px solid var(--plain);
 }
 
 /* ---------- tabs ---------- */

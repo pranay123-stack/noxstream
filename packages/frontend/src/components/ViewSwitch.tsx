@@ -32,25 +32,28 @@ export function ViewSwitch() {
   );
 }
 
+/**
+ * Caption for whichever rendering is on screen. Deliberately terse — it labels
+ * the data below it, and a paragraph here would compete with the data itself.
+ */
 export function ViewSwitchExplainer() {
   const { isPrivate } = useViewMode();
   return (
-    <p className="small muted" style={{ maxWidth: 640 }}>
+    <p className="mode-note muted">
       {isPrivate ? (
-        <>
+        <span>
           <strong style={{ color: "var(--plain)" }}>Private view.</strong> The same
-          rows, decrypted through Nox. A value only appears where the connected
-          account holds an on-chain ACL grant and has signed for it — every other
-          row stays ciphertext, including for the person reading this screen.
-        </>
+          rows, decrypted through Nox. A number appears only where the connected
+          account holds an on-chain ACL grant and has signed for it. Every other
+          row stays ciphertext — including for you.
+        </span>
       ) : (
-        <>
-          <strong style={{ color: "var(--cipher)" }}>Public view.</strong> This is
-          literally what any observer of Sepolia can read: the roster addresses,
-          the aggregate stream, and a 32-byte handle where each salary should be.
-          No amount is hidden behind a UI flag — there is no amount on-chain to
-          hide.
-        </>
+        <span>
+          <strong style={{ color: "var(--cipher)" }}>Public view.</strong> Exactly
+          what any observer of Sepolia can read: roster addresses, the aggregate
+          stream, and a 32-byte handle where each salary should be. Nothing is
+          hidden behind a UI flag — there is no amount on-chain to hide.
+        </span>
       )}
     </p>
   );

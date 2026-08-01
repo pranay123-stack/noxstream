@@ -4,22 +4,31 @@ import { shortAddress } from "@/nox/handle";
 import { Badge, Button, Dot } from "./ui";
 import { ViewSwitch } from "./ViewSwitch";
 
+/**
+ * Three zones: identity, the switch, the wallet.
+ *
+ * The switch sits in the CENTRE rather than bundled against the wallet button.
+ * It is the product's whole argument — the same chain state rendered two ways —
+ * so it takes the optical centre instead of competing for a corner, and the
+ * header stops having a dead gap across the middle on wide screens.
+ */
 export function Masthead() {
   return (
     <header className="masthead">
       <div className="masthead-inner">
         <div className="brand">
           <span className="brand-mark">NX</span>
-          <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <span className="brand-text">
             <span className="brand-name">NoxStream</span>
-            <span className="brand-sub">Confidential payroll streaming</span>
+            <span className="brand-sub">Confidential payroll</span>
           </span>
         </div>
 
-        <div className="row" style={{ gap: 10 }}>
-          <span className="row" style={{ gap: 8 }}>
-            <ViewSwitch />
-          </span>
+        <div className="masthead-center">
+          <ViewSwitch />
+        </div>
+
+        <div className="masthead-end">
           <AccountButton />
         </div>
       </div>

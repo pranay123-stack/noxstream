@@ -4,7 +4,7 @@ import { TARGET_NETWORK } from "@shared/nox";
 import { Masthead } from "@/components/Masthead";
 import { NotDeployed } from "@/components/NotDeployed";
 import { ViewSwitchExplainer } from "@/components/ViewSwitch";
-import { Badge, Button, Callout, Card, CardBody } from "@/components/ui";
+import { Badge, Button, Callout } from "@/components/ui";
 import { EyeIcon, LockIcon, StreamIcon } from "@/components/icons";
 import { deployment } from "@/config/deployments";
 import { hasWalletConnect, targetChain } from "@/config/wagmi";
@@ -28,19 +28,16 @@ export function App() {
     <>
       <Masthead />
       <main className="shell">
-        <section className="stack" style={{ padding: "34px 0 26px" }}>
-          <div className="stack-sm" style={{ maxWidth: 760 }}>
-            <span className="eyebrow">
-              Nox confidential compute · Ethereum Sepolia
-            </span>
-            <h1>Payroll that streams in public and pays in private.</h1>
-            <p className="muted">
-              One ordinary Sablier stream funds the whole company — auditable,
-              composable, exactly as before. Every individual salary lives inside
-              Nox as an encrypted handle. Same screen, one switch, both truths.
-            </p>
-          </div>
-          <div className="row" style={{ gap: 8 }}>
+        <section className="hero">
+          <span className="eyebrow">
+            Nox confidential compute · Ethereum Sepolia
+          </span>
+          <h1>Payroll that streams in public and pays in private.</h1>
+          <p className="hero-lede">
+            One ordinary Sablier stream funds the company — auditable and
+            composable, exactly as before. Every salary inside it is ciphertext.
+          </p>
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
             <Badge>
               <StreamIcon size={11} /> aggregate total: public
             </Badge>
@@ -51,7 +48,6 @@ export function App() {
               <LockIcon size={11} /> every salary: ciphertext
             </Badge>
           </div>
-          <ViewSwitchExplainer />
         </section>
 
         <div className="stack">
@@ -112,6 +108,10 @@ export function App() {
                 </span>
               </div>
 
+              {/* Sits directly above the data it describes, so "this is what an
+                  observer sees" has something visible to point at. */}
+              <ViewSwitchExplainer />
+
               {!isConnected && <ConnectPrompt />}
 
               {role === "employer" ? (
@@ -129,26 +129,29 @@ export function App() {
   );
 }
 
+/**
+ * A slim strip, not a card. Everything below it is genuinely readable without a
+ * wallet — which is the demonstration — so this should inform, not gate. A card
+ * here reads as a blocker and pushes the actual product below the fold.
+ */
 function ConnectPrompt() {
   return (
-    <Card>
-      <CardBody className="stack-sm">
-        <strong>Connect a wallet to interact</strong>
-        <p className="small muted">
-          The public view below is readable without one — that is rather the
-          point. Decrypting anything requires a signature from an account the
-          contract granted access to.
-        </p>
+    <div className="notice">
+      <LockIcon size={13} />
+      <span className="small">
+        Read-only right now. Everything below is public chain data —{" "}
+        <strong>no wallet needed to see it</strong>. Connect one to decrypt the
+        rows you have been granted access to.
         {!hasWalletConnect && (
-          <p className="tiny faint">
-            WalletConnect is not configured in this build, so QR / mobile pairing
-            is unavailable. Browser-extension wallets work normally. Set{" "}
-            <span className="mono">VITE_WALLETCONNECT_PROJECT_ID</span> to enable
-            the rest.
-          </p>
+          <span className="faint">
+            {" "}
+            Browser-extension wallets only in this build; set{" "}
+            <span className="mono tiny">VITE_WALLETCONNECT_PROJECT_ID</span> for QR
+            pairing.
+          </span>
         )}
-      </CardBody>
-    </Card>
+      </span>
+    </div>
   );
 }
 
