@@ -168,7 +168,7 @@ function Point({
 }) {
   return (
     <div className="row" style={{ alignItems: "flex-start", gap: 11, flexWrap: "nowrap" }}>
-      <span style={{ color: "var(--mode)", marginTop: 2, flex: "none" }}>{icon}</span>
+      <span style={{ color: "var(--accent)", marginTop: 2, flex: "none" }}>{icon}</span>
       <span className="stack-sm" style={{ gap: 2 }}>
         <strong className="small">{title}</strong>
         <span className="small muted">{children}</span>

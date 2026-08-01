@@ -1,22 +1,27 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { isZeroHandle, type Handle } from "@shared/nox";
 import { SECONDS_PER_MONTH } from "@shared/types";
 import { DECRYPT_STAGE_LABEL, useDecryption } from "@/nox/DecryptionProvider";
 import { formatAmount, formatSeconds } from "@/lib/format";
-import { useViewMode } from "@/state/ViewModeProvider";
 import { HandleChip } from "./HandleChip";
 import { Button } from "./ui";
-import { LockIcon, UnlockIcon } from "./icons";
+import { ArrowRightIcon, LockIcon, UnlockIcon } from "./icons";
 
 /**
- * The same on-chain value, rendered two ways.
+ * One on-chain value, showing both of its faces at once.
  *
- * PUBLIC  → the handle, always, no exceptions. Flipping to public genuinely
- *           re-hides the number; there is no cached plaintext on screen.
- * PRIVATE → the result of a real `decrypt()`, and only when the connected
- *           account passed the on-chain `isViewer` check.
+ *   [ 0x1f3a…9b21 ]  →  4,200.00 USDC / month     ← this account holds a grant
+ *   [ 0x8c04…2ee7 ]  →  Not authorised            ← it does not
  *
- * Every intermediate state on the way there is a real step, labelled.
+ * The 32-byte handle is ALWAYS on the left, because that is genuinely all the
+ * chain stores. What appears on the right is decided by NoxCompute's access
+ * list, not by anything in this file: an `isViewer(handle, you)` read runs
+ * first, and a row the ACL excludes never even asks for a signature.
+ *
+ * That is why the toggle could go. The proof used to be the contrast between
+ * two modes; it is now the contrast between two rows of the same table, which
+ * is stronger — nobody has to take our word for what the "public view" would
+ * have shown, because it is on screen next to the number the whole time.
  */
 
 export type ValueKind = "rate" | "amount";
@@ -26,40 +31,62 @@ export function ConfidentialValue({
   decimals,
   symbol,
   kind = "amount",
-  /** Start decryption automatically when the private view is entered. */
+  /** Decrypt without being asked. Only ever set for the connected account's own values. */
   auto = false,
-  /** Rendered in the public view instead of a bare handle, if provided. */
-  publicHint,
 }: {
   handle: Handle | undefined;
   decimals: number;
   symbol: string;
   kind?: ValueKind;
   auto?: boolean;
-  publicHint?: ReactNode;
 }) {
-  const { isPrivate } = useViewMode();
   const { entryFor, request } = useDecryption();
   const entry = entryFor(handle);
 
   useEffect(() => {
-    if (!auto || !isPrivate || !handle) return;
+    if (!auto || !handle) return;
     if (entry.stage === "idle") void request(handle);
-  }, [auto, isPrivate, handle, entry.stage, request]);
+  }, [auto, handle, entry.stage, request]);
 
-  if (!isPrivate) {
-    return (
-      <span className="row" style={{ gap: 8, flexWrap: "nowrap", minWidth: 0 }}>
-        <HandleChip handle={handle} />
-        {publicHint}
-      </span>
-    );
-  }
-
-  if (!handle || isZeroHandle(handle)) {
+  // Nothing has been written here yet, so there is no second half to show —
+  // the chip itself renders "not set".
+  if (!handle || isZeroHandle(handle) || entry.stage === "uninitialised") {
     return <HandleChip handle={handle} />;
   }
 
+  return (
+    <span className="cvalue">
+      <HandleChip handle={handle} />
+      <ArrowRightIcon size={13} className="cvalue-arrow" />
+      <span className="cvalue-out">
+        <Outcome
+          entry={entry}
+          handle={handle}
+          decimals={decimals}
+          symbol={symbol}
+          kind={kind}
+          onRetry={() => void request(handle)}
+        />
+      </span>
+    </span>
+  );
+}
+
+function Outcome({
+  entry,
+  handle,
+  decimals,
+  symbol,
+  kind,
+  onRetry,
+}: {
+  entry: ReturnType<ReturnType<typeof useDecryption>["entryFor"]>;
+  handle: Handle;
+  decimals: number;
+  symbol: string;
+  kind: ValueKind;
+  onRetry: () => void;
+}) {
   switch (entry.stage) {
     case "done":
       return (
@@ -73,53 +100,42 @@ export function ConfidentialValue({
       );
 
     case "unauthorised":
-      return (
-        <span className="stack-sm" style={{ gap: 5 }}>
-          <HandleChip handle={handle} dim />
-          <NotAuthorised />
-        </span>
-      );
+      return <NotAuthorised />;
 
     case "error":
       return (
-        <span className="stack-sm" style={{ gap: 5 }}>
-          <HandleChip handle={handle} dim />
+        <>
           <span className="tiny" style={{ color: "var(--danger)" }}>
             {entry.error?.title ?? "Decryption failed"}
           </span>
           <span>
-            <Button size="sm" variant="ghost" onClick={() => void request(handle)}>
+            <Button size="sm" variant="ghost" onClick={onRetry}>
               Try again
             </Button>
           </span>
-        </span>
+        </>
       );
 
+    // Every one of these is a real step that has actually started; none of them
+    // is a placebo progress bar.
     case "checking-acl":
     case "resolving":
     case "awaiting-signature":
     case "decrypting":
       return (
-        <span className="stack-sm" style={{ gap: 5 }}>
-          <HandleChip handle={handle} dim />
-          <span className="tiny row" style={{ gap: 6, color: "var(--mode)" }}>
-            <span className="spinner" style={{ width: 10, height: 10 }} />
-            {DECRYPT_STAGE_LABEL[entry.stage]}
-            {entry.stage === "resolving" && entry.waitedMs ? (
-              <span className="mono faint">{formatSeconds(entry.waitedMs)}</span>
-            ) : null}
-          </span>
+        <span className="cvalue-busy">
+          <span className="spinner" style={{ width: 10, height: 10 }} />
+          {DECRYPT_STAGE_LABEL[entry.stage]}
+          {entry.stage === "resolving" && entry.waitedMs ? (
+            <span className="mono faint">{formatSeconds(entry.waitedMs)}</span>
+          ) : null}
         </span>
       );
 
-    case "uninitialised":
-      return <HandleChip handle={handle} />;
-
     default:
       return (
-        <span className="row" style={{ gap: 8, flexWrap: "nowrap" }}>
-          <HandleChip handle={handle} dim />
-          <Button size="sm" variant="ghost" onClick={() => void request(handle)}>
+        <span>
+          <Button size="sm" variant="ghost" onClick={onRetry}>
             <UnlockIcon size={12} />
             Decrypt
           </Button>
@@ -145,7 +161,7 @@ function DecryptedValue({
   const monthly = kind === "rate" ? value * SECONDS_PER_MONTH : null;
 
   return (
-    <span className="stack-sm" style={{ gap: 4, minWidth: 0 }}>
+    <>
       <span className="row" style={{ gap: 7, flexWrap: "nowrap" }}>
         <UnlockIcon size={12} style={{ color: "var(--plain)", flex: "none" }} />
         <span className="plainvalue">
@@ -160,14 +176,7 @@ function DecryptedValue({
       </span>
       <button
         type="button"
-        className="tiny faint mono"
-        style={{
-          background: "none",
-          border: 0,
-          padding: 0,
-          cursor: "pointer",
-          textAlign: "left",
-        }}
+        className="tiny mono cvalue-note"
         onClick={() => setShowSource((v) => !v)}
         title="Where this number came from"
       >
@@ -188,18 +197,18 @@ function DecryptedValue({
           </span>
         </span>
       )}
-    </span>
+    </>
   );
 }
 
 export function NotAuthorised() {
   const [open, setOpen] = useState(false);
   return (
-    <span className="stack-sm" style={{ gap: 4 }}>
+    <>
       <button
         type="button"
-        className="badge"
-        style={{ cursor: "pointer" }}
+        className="chip-locked"
+        aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
         <LockIcon size={11} />
@@ -212,6 +221,6 @@ export function NotAuthorised() {
           the system working: the handle is public, the number is not.
         </span>
       )}
-    </span>
+    </>
   );
 }

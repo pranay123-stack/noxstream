@@ -1,45 +1,54 @@
 /* ==========================================================================
-   NoxStream design system
-   Dark-first, restrained, two accents that carry meaning:
-     --cipher  violet  = encrypted, opaque, what the world sees
-     --plain   mint    = decrypted, legible, what only you see
-   The page re-tints itself when the public/private toggle flips, so the mode
-   is felt before it is read.
+   NoxStream design system — light
+
+   The page is a soft grey; every card is a true white surface with a hairline
+   border and a soft shadow. That separation is what carries the hierarchy, so
+   no card ever sits on a background the same colour as itself.
+
+   Two accents carry meaning and nothing else:
+     --cipher  violet  = encrypted — what every observer of Sepolia sees
+     --plain   green   = decrypted — what only an authorised account sees
+   Both appear on screen at the same time, in the same row. The contrast
+   between an authorised row and an unauthorised one IS the demonstration.
    ========================================================================== */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  --bg: #07080b;
-  --bg-elev: #0c0e13;
-  --surface: rgba(255, 255, 255, 0.024);
-  --surface-strong: rgba(255, 255, 255, 0.05);
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.14);
+  --bg: #f6f7f9;
+  --bg-elev: #ffffff;
+  --surface: #ffffff;
+  --surface-strong: #f1f2f6;
+  --line: rgba(17, 19, 28, 0.1);
+  --line-strong: rgba(17, 19, 28, 0.18);
 
-  --text: #eceef4;
-  --text-dim: #a3a9b8;
-  --text-faint: #6c7183;
+  --text: #14161d;
+  --text-dim: #4d5362;
+  /* Spec value #797f92 measured 3.72:1 on --bg — below the 4.5:1 floor for
+     body text. Darkened to the nearest tone that clears it on all three
+     backgrounds (5.11 on --bg, 5.48 on white, 4.90 on --surface-strong). */
+  --text-faint: #63697a;
 
-  --accent: #7f8cff;
-  --accent-soft: rgba(127, 140, 255, 0.14);
+  --accent: #4f46e5;
+  --accent-soft: rgba(79, 70, 229, 0.09);
 
-  --cipher: #a98bff;
-  --cipher-soft: rgba(169, 139, 255, 0.13);
-  --cipher-line: rgba(169, 139, 255, 0.3);
+  --cipher: #6d28d9;
+  --cipher-soft: rgba(109, 40, 217, 0.075);
+  --cipher-line: rgba(109, 40, 217, 0.26);
 
-  --plain: #4ade9f;
-  --plain-soft: rgba(74, 222, 159, 0.12);
-  --plain-line: rgba(74, 222, 159, 0.32);
+  --plain: #047857;
+  --plain-soft: rgba(4, 120, 87, 0.075);
+  --plain-line: rgba(4, 120, 87, 0.28);
 
-  --warn: #fbbf24;
-  --warn-soft: rgba(251, 191, 36, 0.12);
-  --danger: #ff7b7b;
-  --danger-soft: rgba(255, 123, 123, 0.12);
+  /* Spec value #b45309 measured 4.39:1 against its own soft fill, which is how
+     it is actually used (badge text on --warn-soft). Darkened to clear 4.5. */
+  --warn: #9a4a06;
+  --warn-soft: rgba(154, 74, 6, 0.1);
+  --warn-line: rgba(154, 74, 6, 0.28);
 
-  --mode: var(--cipher);
-  --mode-soft: var(--cipher-soft);
-  --mode-line: var(--cipher-line);
+  --danger: #b91c1c;
+  --danger-soft: rgba(185, 28, 28, 0.09);
+  --danger-line: rgba(185, 28, 28, 0.28);
 
   --radius-lg: 16px;
   --radius: 11px;
@@ -50,13 +59,8 @@
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", "Consolas",
     monospace;
 
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -18px rgba(0, 0, 0, 0.9);
-}
-
-:root[data-mode="private"] {
-  --mode: var(--plain);
-  --mode-soft: var(--plain-soft);
-  --mode-line: var(--plain-line);
+  --shadow: 0 1px 2px rgba(17, 19, 28, 0.05),
+    0 10px 28px -14px rgba(17, 19, 28, 0.18);
 }
 
 *,
@@ -74,13 +78,12 @@ body {
 body {
   min-height: 100dvh;
   background: var(--bg);
+  /* Two very low-opacity washes, one per accent, so the page is not a flat
+     slab of grey. At these alphas they are felt rather than seen and never
+     compete with a card edge. */
   background-image:
-    radial-gradient(
-      1100px 620px at 78% -8%,
-      color-mix(in srgb, var(--mode) 11%, transparent),
-      transparent 62%
-    ),
-    radial-gradient(900px 520px at 4% 0%, rgba(127, 140, 255, 0.07), transparent 55%);
+    radial-gradient(1100px 620px at 82% -12%, rgba(79, 70, 229, 0.07), transparent 62%),
+    radial-gradient(880px 520px at 0% -4%, rgba(109, 40, 217, 0.05), transparent 58%);
   background-attachment: fixed;
   color: var(--text);
   font-family: var(--font);
@@ -89,7 +92,6 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
-  transition: background-image 420ms ease;
 }
 
 h1,
@@ -101,7 +103,7 @@ h4 {
   letter-spacing: -0.021em;
   line-height: 1.2;
 }
-h1 { font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.1rem); }
+h1 { font-size: clamp(1.7rem, 1.2rem + 1.9vw, 2.35rem); }
 h2 { font-size: 1.14rem; }
 h3 { font-size: 0.98rem; }
 p { margin: 0; }
@@ -116,11 +118,11 @@ select {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--mode) 34%, transparent);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 :focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent) 75%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--accent) 80%, transparent);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -192,52 +194,58 @@ select {
   position: sticky;
   top: 0;
   z-index: 40;
-  backdrop-filter: blur(14px) saturate(140%);
-  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(14px) saturate(160%);
+  background: color-mix(in srgb, var(--bg-elev) 84%, transparent);
   border-bottom: 1px solid var(--line);
 }
 /*
- * Three equal zones so the switch lands on the TRUE optical centre of the page,
- * not merely between two items of unequal width. `1fr auto 1fr` would centre it
- * against the brand and the wallet button, which are different widths — the
- * switch would drift. Equal columns keep it pinned no matter how long the
- * connected address or network-warning label gets.
+ * Two zones now that the view toggle is gone: identity on the left, live
+ * context and the wallet on the right. A three-column grid with an empty
+ * middle would leave a visible dead gap, so the header is a single flex row
+ * that simply pushes the two groups apart.
  */
 .masthead-inner {
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 12px clamp(16px, 4vw, 32px);
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 16px;
-}
-.masthead-center {
+  padding: 11px clamp(16px, 4vw, 32px);
   display: flex;
-  justify-content: center;
-  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 .masthead-end {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 10px;
   min-width: 0;
 }
 
-/* Below ~860px there is not enough room for three zones; stack the switch onto
-   its own full-width row so it stays tappable instead of being squeezed. */
-@media (max-width: 860px) {
-  .masthead-inner {
-    grid-template-columns: 1fr auto;
-    row-gap: 10px;
-  }
-  .masthead-center {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-  .masthead-center .viewswitch {
-    width: 100%;
-  }
+/* The live-deployment chip: proof in the chrome that this is pointed at real
+   Sepolia contracts. First thing to drop when the header gets tight — the
+   footer carries the same addresses in full. */
+.masthead-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+.masthead-chip:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+.masthead-chip .dot { color: var(--plain); }
+@media (max-width: 980px) {
+  .masthead-chip { display: none; }
 }
 
 .brand {
@@ -258,14 +266,16 @@ select {
   .brand-sub { display: none; }
 }
 .brand-mark {
-  width: 30px;
-  height: 30px;
+  width: 31px;
+  height: 31px;
   flex: none;
   border-radius: 9px;
   display: grid;
   place-items: center;
   background: linear-gradient(150deg, var(--cipher), var(--accent) 55%, var(--plain));
-  color: #06070a;
+  /* White clears 5.4:1 against the darkest stop of that gradient; the near-black
+     the dark theme used would have been unreadable on all three. */
+  color: #ffffff;
   font-weight: 800;
   font-size: 0.86rem;
   letter-spacing: -0.04em;
@@ -286,74 +296,81 @@ select {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 44px 0 30px;
+  padding: 46px 0 32px;
 }
 /* Two lines on a wide screen, never three. A display heading that wraps three
    times stops reading as a statement and starts reading as a paragraph. */
 .hero h1 {
-  max-width: 26ch;
+  max-width: 27ch;
   text-wrap: balance;
 }
-/*
- * ~62 characters. Long-form prose wants 65-75ch, but this sits under a large
- * display heading, and a lede that runs wider than the headline it supports
- * reads as a wall rather than a subtitle.
- */
+/* One sentence, capped at a subtitle measure. Anything longer competes with
+   the data below instead of introducing it. */
 .hero-lede {
-  max-width: 58ch;
+  max-width: 56ch;
   color: var(--text-dim);
-  font-size: 1.02rem;
+  font-size: 1.04rem;
   line-height: 1.55;
+}
+
+/*
+ * The idea, made visible before the user scrolls: a REAL handle read from
+ * NoxPayrollRegistry on the left, and what it takes to turn it into a number
+ * on the right. No sample values — if the roster is empty this strip does not
+ * render at all rather than invent one.
+ */
+.heroproof {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 4px;
+  padding: 13px 16px;
+  max-width: 760px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--cipher);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.heroproof-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.heroproof-out {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  color: var(--plain);
+  font-weight: 560;
 }
 
 /* ---------- inline notice ---------- */
 
 /*
  * For information that should be READ but not obeyed. Deliberately NOT boxed:
- * the mode caption directly above it already carries an accent rule, and two
- * stacked accent bars read as two warnings competing for the same attention.
- * This one is connective tissue, so it is plain text with a quiet icon.
+ * it is connective tissue between the hero and the data, and a second bordered
+ * block here would read as a warning competing with the callouts below it.
  */
 .notice {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  padding: 2px 2px 2px 13px;
+  padding: 2px 2px 2px 2px;
   color: var(--text-faint);
   max-width: 84ch;
 }
 .notice > svg {
   flex: none;
   margin-top: 3px;
-  opacity: 0.65;
+  opacity: 0.7;
 }
 .notice strong {
   color: var(--text-dim);
   font-weight: 600;
-}
-
-/* The mode explainer reads as a caption for the data beneath it, so it is
-   keyed to whichever mode is active rather than sitting in neutral chrome. */
-.mode-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 0.85rem;
-  line-height: 1.55;
-  /* Caps the measure at a readable ~85 characters. Left to fill the 1180px
-     shell, small text runs past 160 characters per line and the eye loses the
-     return sweep. */
-  max-width: 88ch;
-  border: 1px solid var(--line);
-  background: var(--surface-2, transparent);
-}
-:root[data-mode="public"] .mode-note {
-  border-left: 2px solid var(--cipher);
-}
-:root[data-mode="private"] .mode-note {
-  border-left: 2px solid var(--plain);
 }
 
 /* ---------- tabs ---------- */
@@ -364,14 +381,15 @@ select {
   gap: 2px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: var(--surface);
+  background: var(--bg-elev);
+  box-shadow: var(--shadow);
 }
 .tab {
   appearance: none;
   border: 0;
   background: transparent;
   color: var(--text-dim);
-  padding: 6px 15px;
+  padding: 6px 16px;
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 560;
@@ -381,15 +399,15 @@ select {
 }
 .tab:hover { color: var(--text); }
 .tab[aria-selected="true"] {
-  background: var(--surface-strong);
-  color: var(--text);
-  box-shadow: inset 0 0 0 1px var(--line);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 620;
 }
 
 /* ---------- cards ---------- */
 
 .card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012));
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
@@ -409,10 +427,13 @@ select {
 .card-foot {
   padding: 14px clamp(16px, 2.4vw, 24px);
   border-top: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.014);
+  background: var(--surface-strong);
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
-.card-accent { border-color: color-mix(in srgb, var(--mode) 28%, var(--line)); }
+.card-accent {
+  border-color: color-mix(in srgb, var(--accent) 26%, var(--line));
+  box-shadow: var(--shadow), inset 0 2px 0 -1px color-mix(in srgb, var(--accent) 32%, transparent);
+}
 
 /* ---------- buttons ---------- */
 
@@ -437,24 +458,40 @@ select {
   transition: transform 110ms ease, filter 140ms ease, background 140ms ease,
     border-color 140ms ease, opacity 140ms ease;
 }
-.btn:hover:not(:disabled) { filter: brightness(1.13); }
+/* On a light surface "hover = brighter" washes a control out; darkening is the
+   move that reads as pressed-toward-you here. */
+.btn:hover:not(:disabled) { filter: brightness(0.955); }
 .btn:active:not(:disabled) { transform: translateY(1px); }
-.btn:disabled { opacity: 0.42; cursor: not-allowed; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-primary {
   --btn-bg: linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, white 8%), var(--accent));
-  --btn-fg: #06070d;
+  --btn-fg: #ffffff;
   --btn-line: transparent;
   font-weight: 640;
+  box-shadow: 0 1px 2px rgba(17, 19, 28, 0.12);
 }
-.btn-mode {
-  --btn-bg: linear-gradient(180deg, color-mix(in srgb, var(--mode) 92%, white 8%), var(--mode));
-  --btn-fg: #06070d;
+.btn-accent {
+  --btn-bg: linear-gradient(180deg, color-mix(in srgb, var(--cipher) 92%, white 8%), var(--cipher));
+  --btn-fg: #ffffff;
   --btn-line: transparent;
   font-weight: 640;
+  box-shadow: 0 1px 2px rgba(17, 19, 28, 0.12);
 }
-.btn-ghost { --btn-bg: transparent; --btn-line: var(--line); color: var(--text-dim); }
-.btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--line-strong); }
-.btn-danger { --btn-bg: var(--danger-soft); --btn-fg: var(--danger); --btn-line: rgba(255, 123, 123, 0.3); }
+.btn-ghost {
+  --btn-bg: transparent;
+  --btn-line: var(--line);
+  color: var(--text-dim);
+}
+.btn-ghost:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--line-strong);
+  background: var(--surface-strong);
+}
+.btn-danger {
+  --btn-bg: var(--danger-soft);
+  --btn-fg: var(--danger);
+  --btn-line: var(--danger-line);
+}
 .btn-sm { padding: 5px 10px; font-size: 0.79rem; border-radius: var(--radius-sm); }
 .btn-block { width: 100%; }
 .btn-icon {
@@ -482,15 +519,15 @@ select {
   width: 100%;
   padding: 9px 12px;
   border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-elev);
   color: var(--text);
-  transition: border-color 140ms ease, background 140ms ease;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
   min-width: 0;
 }
 .input::placeholder,
 .textarea::placeholder { color: var(--text-faint); }
-.input:hover, .textarea:hover { border-color: var(--line-strong); }
+.input:hover, .textarea:hover { border-color: color-mix(in srgb, var(--text) 30%, transparent); }
 .input:focus, .textarea:focus {
   outline: none;
   border-color: color-mix(in srgb, var(--accent) 62%, transparent);
@@ -521,9 +558,9 @@ select {
 }
 .badge-cipher { color: var(--cipher); background: var(--cipher-soft); border-color: var(--cipher-line); }
 .badge-plain { color: var(--plain); background: var(--plain-soft); border-color: var(--plain-line); }
-.badge-warn { color: var(--warn); background: var(--warn-soft); border-color: rgba(251, 191, 36, 0.28); }
-.badge-danger { color: var(--danger); background: var(--danger-soft); border-color: rgba(255, 123, 123, 0.28); }
-.badge-mode { color: var(--mode); background: var(--mode-soft); border-color: var(--mode-line); }
+.badge-warn { color: var(--warn); background: var(--warn-soft); border-color: var(--warn-line); }
+.badge-danger { color: var(--danger); background: var(--danger-soft); border-color: var(--danger-line); }
+.badge-accent { color: var(--accent); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
 
 .dot {
   width: 6px;
@@ -534,51 +571,6 @@ select {
 }
 .dot-pulse { animation: pulse 1.6s ease-in-out infinite; }
 
-/* ---------- the public / private switch ---------- */
-
-.viewswitch {
-  display: inline-flex;
-  position: relative;
-  padding: 3px;
-  border-radius: 999px;
-  border: 1px solid var(--mode-line);
-  background: color-mix(in srgb, var(--mode) 8%, rgba(0, 0, 0, 0.34));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-.viewswitch-thumb {
-  position: absolute;
-  top: 3px;
-  bottom: 3px;
-  width: calc(50% - 3px);
-  border-radius: 999px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--mode) 90%, white 10%), var(--mode));
-  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
-}
-.viewswitch[data-mode="public"] .viewswitch-thumb { transform: translateX(0); }
-.viewswitch[data-mode="private"] .viewswitch-thumb { transform: translateX(100%); }
-.viewswitch-option {
-  position: relative;
-  z-index: 1;
-  appearance: none;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  padding: 6px 16px;
-  border-radius: 999px;
-  font-size: 0.82rem;
-  font-weight: 620;
-  letter-spacing: 0.005em;
-  color: var(--text-dim);
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  transition: color 200ms ease;
-  min-width: 118px;
-  justify-content: center;
-}
-.viewswitch-option[aria-pressed="true"] { color: #06070d; }
-
 /* ---------- ciphertext ---------- */
 
 .cipher {
@@ -588,9 +580,8 @@ select {
   padding: 3px 9px 3px 7px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--cipher-line);
-  background:
-    linear-gradient(90deg, rgba(169, 139, 255, 0.03), rgba(169, 139, 255, 0.11), rgba(169, 139, 255, 0.03));
-  color: color-mix(in srgb, var(--cipher) 88%, white 12%);
+  background: var(--cipher-soft);
+  color: var(--cipher);
   font-family: var(--mono);
   font-size: 0.8rem;
   letter-spacing: 0.055em;
@@ -600,6 +591,8 @@ select {
   cursor: pointer;
   text-align: left;
 }
+/* A white sheen is invisible on a light fill; the pass has to be made of the
+   accent itself to read at all. */
 .cipher::after {
   content: "";
   position: absolute;
@@ -607,7 +600,7 @@ select {
   background: linear-gradient(
     100deg,
     transparent 20%,
-    rgba(255, 255, 255, 0.14) 48%,
+    rgba(109, 40, 217, 0.13) 48%,
     transparent 76%
   );
   transform: translateX(-100%);
@@ -615,14 +608,14 @@ select {
   pointer-events: none;
 }
 .cipher-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cipher-lock { flex: none; opacity: 0.75; }
+.cipher-lock { flex: none; opacity: 0.85; }
 .cipher-full {
   display: block;
   padding: 9px 11px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--cipher-line);
-  background: rgba(169, 139, 255, 0.06);
-  color: color-mix(in srgb, var(--cipher) 88%, white 12%);
+  background: rgba(109, 40, 217, 0.05);
+  color: var(--cipher);
   font-family: var(--mono);
   font-size: 0.76rem;
   letter-spacing: 0.05em;
@@ -643,9 +636,9 @@ select {
 .plainvalue {
   font-family: var(--mono);
   font-size: 0.92rem;
-  font-weight: 600;
+  font-weight: 640;
   letter-spacing: -0.01em;
-  color: color-mix(in srgb, var(--plain) 30%, white);
+  color: var(--plain);
   animation: reveal 340ms cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: baseline;
@@ -653,12 +646,76 @@ select {
 }
 .plainvalue-unit { font-size: 0.76rem; font-weight: 500; color: var(--text-dim); }
 
+/* ---------- the confidential value: handle AND outcome, always ---------- */
+
+/*
+ * There is no mode any more, so both halves of the argument have to be on
+ * screen at once: the ciphertext the chain actually holds, then what this
+ * account can do with it. The row that shows a number and the row that shows
+ * "not authorised" are the same component in the same state machine — the
+ * difference between them is entirely on-chain ACL, not a UI flag.
+ */
+.cvalue {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.cvalue-arrow {
+  flex: none;
+  color: var(--text-faint);
+  opacity: 0.8;
+}
+.cvalue-out {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: 0.83rem;
+}
+.cvalue-busy {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.76rem;
+  color: var(--accent);
+}
+/* Deliberately dashed and grey rather than red: being refused is the system
+   working correctly, not an error. */
+.chip-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px dashed var(--line-strong);
+  background: var(--surface-strong);
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.chip-locked:hover { border-color: var(--text-faint); color: var(--text); }
+.cvalue-note {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-faint);
+}
+.cvalue-note:hover { color: var(--text-dim); }
+
 /* ---------- stat tiles ---------- */
 
 .tile {
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--surface);
+  /* Tiles live inside white cards, so they take the grey to stay legible as
+     separate objects. */
+  background: var(--surface-strong);
   padding: 14px 15px;
   display: flex;
   flex-direction: column;
@@ -691,12 +748,13 @@ select {
   overflow-x: auto;
   border-radius: var(--radius);
   border: 1px solid var(--line);
+  background: var(--surface);
   -webkit-overflow-scrolling: touch;
 }
 table.data {
   width: 100%;
   border-collapse: collapse;
-  min-width: 620px;
+  min-width: 640px;
 }
 table.data th {
   text-align: left;
@@ -706,7 +764,7 @@ table.data th {
   text-transform: uppercase;
   color: var(--text-faint);
   padding: 11px 14px;
-  background: rgba(255, 255, 255, 0.022);
+  background: var(--surface-strong);
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
 }
@@ -717,12 +775,12 @@ table.data td {
 }
 table.data tr:last-child td { border-bottom: 0; }
 table.data tbody tr { transition: background 140ms ease; }
-table.data tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+table.data tbody tr:hover { background: rgba(17, 19, 28, 0.025); }
 table.data tr.is-you {
-  background: color-mix(in srgb, var(--mode) 7%, transparent);
-  box-shadow: inset 3px 0 0 var(--mode);
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
-table.data tr.is-you:hover { background: color-mix(in srgb, var(--mode) 10%, transparent); }
+table.data tr.is-you:hover { background: color-mix(in srgb, var(--accent) 13%, transparent); }
 .cell-right { text-align: right; }
 
 /* ---------- callouts ---------- */
@@ -733,17 +791,18 @@ table.data tr.is-you:hover { background: color-mix(in srgb, var(--mode) 10%, tra
   padding: 13px 15px;
   border-radius: var(--radius);
   border: 1px solid var(--line);
-  background: var(--surface);
+  background: var(--surface-strong);
   font-size: 0.86rem;
   color: var(--text-dim);
   align-items: flex-start;
 }
 .callout-icon { flex: none; margin-top: 1px; }
 .callout strong { color: var(--text); font-weight: 620; }
-.callout-info { border-color: rgba(127, 140, 255, 0.26); background: var(--accent-soft); }
-.callout-warn { border-color: rgba(251, 191, 36, 0.26); background: var(--warn-soft); }
-.callout-danger { border-color: rgba(255, 123, 123, 0.28); background: var(--danger-soft); }
+.callout-info { border-color: color-mix(in srgb, var(--accent) 26%, transparent); background: var(--accent-soft); }
+.callout-warn { border-color: var(--warn-line); background: var(--warn-soft); }
+.callout-danger { border-color: var(--danger-line); background: var(--danger-soft); }
 .callout-ok { border-color: var(--plain-line); background: var(--plain-soft); }
+.callout-plain { border-color: var(--plain-line); background: var(--plain-soft); }
 
 /* ---------- steps ---------- */
 
@@ -767,10 +826,10 @@ table.data tr.is-you:hover { background: color-mix(in srgb, var(--mode) 10%, tra
   place-items: center;
   font-size: 0.6rem;
 }
-.step-active { color: var(--mode); font-weight: 580; }
+.step-active { color: var(--accent); font-weight: 580; }
 .step-done { color: var(--plain); }
 .step-failed { color: var(--danger); }
-.step-detail { margin-left: auto; font-size: 0.76rem; font-family: var(--mono); opacity: 0.8; }
+.step-detail { margin-left: auto; font-size: 0.76rem; font-family: var(--mono); color: var(--text-faint); }
 
 /* ---------- misc ---------- */
 
@@ -813,7 +872,7 @@ table.data tr.is-you:hover { background: color-mix(in srgb, var(--mode) 10%, tra
   border-bottom: 1px solid var(--line-strong);
   transition: color 140ms ease, border-color 140ms ease;
 }
-.link:hover { color: var(--text); border-color: currentColor; }
+.link:hover { color: var(--accent); border-color: currentColor; }
 
 .empty {
   display: flex;
@@ -831,6 +890,7 @@ table.data tr.is-you:hover { background: color-mix(in srgb, var(--mode) 10%, tra
   display: grid;
   place-items: center;
   border: 1px dashed var(--line-strong);
+  background: var(--surface-strong);
   color: var(--text-faint);
 }
 
@@ -874,7 +934,7 @@ table.data tr.is-you:hover { background: color-mix(in srgb, var(--mode) 10%, tra
 
 @media (max-width: 720px) {
   .masthead-inner { padding-top: 10px; padding-bottom: 10px; }
-  .viewswitch-option { min-width: 0; padding: 6px 11px; font-size: 0.78rem; }
+  .hero { padding: 30px 0 24px; }
   .tile-value { font-size: 1.15rem; }
   .kv { flex-direction: column; gap: 2px; }
   .kv-val { text-align: left; }

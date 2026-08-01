@@ -10,7 +10,8 @@ import { AlertIcon, CheckIcon, CopyIcon, ExternalIcon, InfoIcon } from "./icons"
 
 /* ---------------------------------------------------------------- button */
 
-type ButtonVariant = "primary" | "mode" | "ghost" | "danger" | "default";
+/** `accent` is the violet "this action is about ciphertext" button. */
+type ButtonVariant = "primary" | "accent" | "ghost" | "danger" | "default";
 
 export function Button({
   variant = "default",
@@ -110,7 +111,7 @@ export function Badge({
   tone = "default",
   children,
 }: {
-  tone?: "default" | "cipher" | "plain" | "warn" | "danger" | "mode";
+  tone?: "default" | "cipher" | "plain" | "warn" | "danger" | "accent";
   children: ReactNode;
 }) {
   return (

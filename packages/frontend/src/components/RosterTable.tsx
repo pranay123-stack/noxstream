@@ -5,16 +5,16 @@ import { Badge, Button, EmptyState } from "./ui";
 import { LockIcon, UnlockIcon } from "./icons";
 import { shortAddress } from "@/nox/handle";
 import { useDecryption } from "@/nox/DecryptionProvider";
-import { useViewMode } from "@/state/ViewModeProvider";
 import type { RosterRow } from "@/hooks/useRoster";
 
 /**
  * The roster as the chain holds it: public addresses, encrypted rates.
  *
- * The salary column is the demo. In the public view it is the literal handle
- * returned by `ratePerSecondOf`. In the private view it is whatever a real
- * `decrypt()` returns — which, for most rows, is nothing, because most rows are
- * not yours.
+ * The salary column is the demo, and it carries both halves at once — the
+ * literal handle returned by `ratePerSecondOf`, then whatever a real
+ * `decrypt()` returns for the connected account. For most rows that is nothing,
+ * because most rows are not yours, and the two kinds of row sitting next to
+ * each other is the proof.
  */
 export function RosterTable({
   rows,
@@ -28,7 +28,6 @@ export function RosterTable({
   isLoading?: boolean;
 }) {
   const { address } = useAccount();
-  const { isPrivate } = useViewMode();
   const { requestMany, entryFor } = useDecryption();
 
   const handles = rows
@@ -47,10 +46,11 @@ export function RosterTable({
 
   return (
     <div className="stack-sm">
-      {isPrivate && untried.length > 0 && (
+      {untried.length > 0 && (
         <div className="row-between">
           <span className="tiny faint">
             {untried.length} row{untried.length === 1 ? "" : "s"} not yet attempted.
+            Nothing is decrypted until you ask for it.
           </span>
           <Button size="sm" variant="ghost" onClick={() => void requestMany(untried)}>
             <UnlockIcon size={12} />
@@ -66,7 +66,7 @@ export function RosterTable({
               <th style={{ width: 42 }}>#</th>
               <th>Employee</th>
               <th>Status</th>
-              <th>{isPrivate ? "Salary" : "Salary — as stored on-chain"}</th>
+              <th>Salary — stored ciphertext → what you can read</th>
             </tr>
           </thead>
           <tbody>
@@ -80,7 +80,7 @@ export function RosterTable({
                       <span className="mono small nowrap">
                         {shortAddress(row.employee)}
                       </span>
-                      {isYou && <Badge tone="mode">you</Badge>}
+                      {isYou && <Badge tone="accent">you</Badge>}
                     </div>
                   </td>
                   <td>
@@ -113,11 +113,12 @@ export function RosterTable({
         </table>
       </div>
 
-      {!isPrivate && rows.length > 0 && (
+      {rows.length > 0 && (
         <p className="tiny faint">
-          Those bytes are the whole of it. There is no hidden amount field an
-          indexer could pick up later — the number exists only as ciphertext
-          held by Nox, and only for accounts the contract granted access to.
+          The left-hand bytes are the whole of it. There is no hidden amount
+          field an indexer could pick up later — a row only turns into a number
+          when NoxCompute's access list names this account, which is why most
+          of them do not.
         </p>
       )}
       {rows.some((row) => !row.isActive) && (

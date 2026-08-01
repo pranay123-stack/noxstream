@@ -47,7 +47,7 @@ export function EmployerView({ protocol }: { protocol: ProtocolInfo }) {
       <Card accent>
         <CardHead
           title="Roster on-chain"
-          sub="Addresses are public. Rates are euint256 handles — flip the switch in the header to try decrypting the ones you hold a grant on."
+          sub="Addresses are public; rates are euint256 handles. Every row shows the handle and then what this account can actually read from it — a number where you hold an ACL grant, nothing where you do not."
           action={
             <div className="row" style={{ gap: 8 }}>
               <Badge>

@@ -114,6 +114,13 @@ export const RefreshIcon = (p: IconProps) => (
   </Icon>
 );
 
+export const ArrowRightIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 12h15" />
+    <path d="M13.5 6.5 19 12l-5.5 5.5" />
+  </Icon>
+);
+
 export const UploadIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M12 16V4.5" />

@@ -1,16 +1,18 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { TARGET_NETWORK } from "@shared/nox";
+import { deployment } from "@/config/deployments";
 import { shortAddress } from "@/nox/handle";
 import { Badge, Button, Dot } from "./ui";
-import { ViewSwitch } from "./ViewSwitch";
+import { ExternalIcon } from "./icons";
 
 /**
- * Three zones: identity, the switch, the wallet.
+ * Two zones: identity, and live context + wallet.
  *
- * The switch sits in the CENTRE rather than bundled against the wallet button.
- * It is the product's whole argument — the same chain state rendered two ways —
- * so it takes the optical centre instead of competing for a corner, and the
- * header stops having a dead gap across the middle on wide screens.
+ * The centre used to hold the public/private switch. With that gone, a
+ * three-column grid would leave a visible dead gap across the middle, so the
+ * header is a plain flex row. The space the switch vacated is spent on
+ * something a judge can verify instead of a control they have to operate: the
+ * registry address this build is actually reading, linked to Etherscan.
  */
 export function Masthead() {
   return (
@@ -24,15 +26,45 @@ export function Masthead() {
           </span>
         </div>
 
-        <div className="masthead-center">
-          <ViewSwitch />
-        </div>
-
         <div className="masthead-end">
+          <DeploymentChip />
           <AccountButton />
         </div>
       </div>
     </header>
+  );
+}
+
+/**
+ * Real addresses or nothing. When no deployment record is present the chip says
+ * so rather than rendering a plausible-looking address.
+ */
+function DeploymentChip() {
+  const registry = deployment.record?.contracts.payrollRegistry;
+
+  if (!registry) {
+    return (
+      <span className="masthead-chip">
+        <span className="faint">no deployment record</span>
+      </span>
+    );
+  }
+
+  return (
+    <a
+      className="masthead-chip"
+      href={`${TARGET_NETWORK.explorer}/address/${registry}`}
+      target="_blank"
+      rel="noreferrer noopener"
+      title="The NoxPayrollRegistry this build reads from"
+    >
+      <Dot pulse />
+      <span>
+        Live on {TARGET_NETWORK.name} · registry{" "}
+        <span className="mono">{shortAddress(registry, 4)}</span>
+      </span>
+      <ExternalIcon size={11} />
+    </a>
   );
 }
 

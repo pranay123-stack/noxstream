@@ -362,7 +362,7 @@ export function AllocationComposer({
 
         <div className="row">
           <Button
-            variant="mode"
+            variant="accent"
             disabled={!canEncrypt}
             loading={encryption.isRunning}
             onClick={() => {
@@ -497,7 +497,7 @@ function EncryptionReveal({
                       )}
                     </div>
                   ) : row.status === "encrypting" ? (
-                    <span className="row tiny" style={{ gap: 7, color: "var(--mode)" }}>
+                    <span className="row tiny" style={{ gap: 7, color: "var(--cipher)" }}>
                       <span className="spinner" style={{ width: 11, height: 11 }} />
                       encrypting at the handle gateway…
                     </span>

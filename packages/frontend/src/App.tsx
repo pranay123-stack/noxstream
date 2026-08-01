@@ -1,14 +1,21 @@
 import { useState } from "react";
 import { useAccount, useSwitchChain } from "wagmi";
-import { TARGET_NETWORK } from "@shared/nox";
+import { TARGET_NETWORK, isZeroHandle } from "@shared/nox";
+import { HandleChip } from "@/components/HandleChip";
 import { Masthead } from "@/components/Masthead";
 import { NotDeployed } from "@/components/NotDeployed";
-import { ViewSwitchExplainer } from "@/components/ViewSwitch";
 import { Badge, Button, Callout } from "@/components/ui";
-import { EyeIcon, LockIcon, StreamIcon } from "@/components/icons";
+import {
+  ArrowRightIcon,
+  EyeIcon,
+  LockIcon,
+  StreamIcon,
+  UnlockIcon,
+} from "@/components/icons";
 import { deployment } from "@/config/deployments";
 import { hasWalletConnect, targetChain } from "@/config/wagmi";
 import { useProtocol } from "@/hooks/useProtocol";
+import { useRoster } from "@/hooks/useRoster";
 import { useHandleClient } from "@/nox/HandleClientProvider";
 import { EmployeeView } from "@/views/EmployeeView";
 import { EmployerView } from "@/views/EmployerView";
@@ -34,8 +41,8 @@ export function App() {
           </span>
           <h1>Payroll that streams in public and pays in private.</h1>
           <p className="hero-lede">
-            One ordinary Sablier stream funds the company — auditable and
-            composable, exactly as before. Every salary inside it is ciphertext.
+            One ordinary Sablier stream funds the company in the open; every
+            salary inside it exists on-chain only as a 32-byte encrypted handle.
           </p>
           <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
             <Badge>
@@ -48,6 +55,7 @@ export function App() {
               <LockIcon size={11} /> every salary: ciphertext
             </Badge>
           </div>
+          <HeroProof />
         </section>
 
         <div className="stack">
@@ -108,10 +116,6 @@ export function App() {
                 </span>
               </div>
 
-              {/* Sits directly above the data it describes, so "this is what an
-                  observer sees" has something visible to point at. */}
-              <ViewSwitchExplainer />
-
               {!isConnected && <ConnectPrompt />}
 
               {role === "employer" ? (
@@ -126,6 +130,41 @@ export function App() {
         <Footer />
       </main>
     </>
+  );
+}
+
+/**
+ * The whole idea in one line, using a REAL handle read from
+ * `NoxPayrollRegistry.ratePerSecondOf` on Sepolia — not a sample. If the roster
+ * is empty there is nothing honest to show, so the strip does not render;
+ * inventing a handle here would undercut the one claim the app is making.
+ */
+function HeroProof() {
+  const roster = useRoster();
+  const sample = roster.rows.find(
+    (row) => row.rateHandle && !isZeroHandle(row.rateHandle),
+  );
+  if (!sample?.rateHandle) return null;
+
+  return (
+    <div className="heroproof">
+      <span className="eyebrow">
+        One employee&apos;s salary, exactly as Sepolia stores it
+      </span>
+      <div className="heroproof-row">
+        <HandleChip handle={sample.rateHandle} />
+        <ArrowRightIcon size={14} className="cvalue-arrow" />
+        <span className="heroproof-out">
+          <UnlockIcon size={12} />a real number — but only for an account
+          NoxCompute authorised
+        </span>
+      </div>
+      <span className="tiny faint">
+        Read live from <span className="mono">ratePerSecondOf()</span>. Scroll
+        down and the roster shows the same thing per row: the handle every
+        observer gets, next to the plaintext only a grant-holder can obtain.
+      </span>
+    </div>
   );
 }
 

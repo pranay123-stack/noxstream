@@ -12,7 +12,8 @@ import { isZeroHandle } from "@shared/nox";
  *   bytes 7..31 opaque digest
  *
  * So the world learns "this is a uint256 on chain 11155111". It learns nothing
- * about the number. Showing that split is the point of the public view.
+ * about the number. Showing that split — beside what the account can actually
+ * decrypt — is the point of the handle chip.
  *
  * Layout transcribed from @iexec-nox/handle@0.1.0-beta.13
  * `src/utils/types.ts` (handleToVersion / handleToChainId /

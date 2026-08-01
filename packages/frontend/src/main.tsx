@@ -1,13 +1,12 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
+import { RainbowKitProvider, lightTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { App } from "./App";
 import { wagmiConfig } from "./config/wagmi";
 import { DecryptionProvider } from "./nox/DecryptionProvider";
 import { HandleClientProvider } from "./nox/HandleClientProvider";
-import { ViewModeProvider } from "./state/ViewModeProvider";
 
 import "@rainbow-me/rainbowkit/styles.css";
 import "./styles/global.css";
@@ -25,21 +24,20 @@ createRoot(container).render(
   <StrictMode>
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
+        {/* Matches the app's own palette: --accent on white, white foreground. */}
         <RainbowKitProvider
-          theme={darkTheme({
-            accentColor: "#7f8cff",
-            accentColorForeground: "#06070d",
+          theme={lightTheme({
+            accentColor: "#4f46e5",
+            accentColorForeground: "#ffffff",
             borderRadius: "medium",
             overlayBlur: "small",
           })}
         >
-          <ViewModeProvider>
-            <HandleClientProvider>
-              <DecryptionProvider>
-                <App />
-              </DecryptionProvider>
-            </HandleClientProvider>
-          </ViewModeProvider>
+          <HandleClientProvider>
+            <DecryptionProvider>
+              <App />
+            </DecryptionProvider>
+          </HandleClientProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

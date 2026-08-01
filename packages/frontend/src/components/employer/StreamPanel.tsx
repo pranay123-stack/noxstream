@@ -32,8 +32,8 @@ import { ExternalIcon, StreamIcon } from "@/components/icons";
  *
  * Everything here is a plain number anyone can read, and that is the point: the
  * aggregate stays auditable and composable while only the per-employee split
- * moves into the TEE. Nothing on this panel is redacted in the private view
- * either — there is nothing here to redact.
+ * moves into the TEE. Nothing on this panel is ever redacted — there is nothing
+ * here to redact.
  */
 export function StreamPanel({
   protocol,
@@ -330,7 +330,7 @@ export function StreamPanel({
         <div className="row">
           {isEmployer && !protocol.hasStarted && (
             <Button
-              variant="mode"
+              variant="accent"
               loading={startTx.isBusy}
               disabled={!payroll}
               onClick={() =>

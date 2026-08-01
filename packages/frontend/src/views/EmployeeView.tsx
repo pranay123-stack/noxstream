@@ -30,7 +30,6 @@ import { formatAmount, formatDuration, formatTimestamp } from "@/lib/format";
 import { ZERO_ADDRESS, type ProtocolInfo } from "@/hooks/useProtocol";
 import { useTxFlow } from "@/hooks/useTxFlow";
 import { useDecryption } from "@/nox/DecryptionProvider";
-import { useViewMode } from "@/state/ViewModeProvider";
 
 /**
  * The employee side. Three numbers that exist on-chain only as ciphertext, one
@@ -38,7 +37,6 @@ import { useViewMode } from "@/state/ViewModeProvider";
  */
 export function EmployeeView({ protocol }: { protocol: ProtocolInfo }) {
   const { address } = useAccount();
-  const { isPrivate } = useViewMode();
   const { entryFor } = useDecryption();
   const claimTx = useTxFlow();
   const settleTx = useTxFlow();
@@ -170,7 +168,7 @@ export function EmployeeView({ protocol }: { protocol: ProtocolInfo }) {
       <Card accent>
         <CardHead
           title="Your confidential balance"
-          sub="Every figure below is an euint256 handle on-chain. The private view shows what a real decrypt() returns for this account, and nothing else."
+          sub="Each figure is shown as the euint256 handle the chain actually stores, next to what a real decrypt() returns for this account — and nothing else."
           action={
             <div className="row" style={{ gap: 8 }}>
               {isActive ? (
@@ -199,7 +197,7 @@ export function EmployeeView({ protocol }: { protocol: ProtocolInfo }) {
           <div className="grid-3">
             <Tile
               label="Accrued"
-              badge={<ModeBadge />}
+              badge={<CipherMark />}
               value={
                 <ConfidentialValue
                   handle={accruedHandle}
@@ -209,7 +207,7 @@ export function EmployeeView({ protocol }: { protocol: ProtocolInfo }) {
                 />
               }
               note={
-                projected !== undefined && isPrivate
+                projected !== undefined
                   ? `≈ ${formatAmount(projected, decimals, 4)} ${symbol} including ${formatDuration(
                       now - Number(lastAccrualAt > 0n ? lastAccrualAt : protocol.startedAt),
                     )} since the last settle — projected locally, not yet on-chain`
@@ -218,7 +216,7 @@ export function EmployeeView({ protocol }: { protocol: ProtocolInfo }) {
             />
             <Tile
               label="Claimed to date"
-              badge={<ModeBadge />}
+              badge={<CipherMark />}
               value={
                 <ConfidentialValue
                   handle={claimedHandle}
@@ -231,33 +229,26 @@ export function EmployeeView({ protocol }: { protocol: ProtocolInfo }) {
             />
             <Tile
               label="Claimable now"
-              badge={<ModeBadge />}
               value={
-                isPrivate ? (
-                  claimable === undefined ? (
-                    <span className="small faint">
-                      decrypt accrued and claimed to derive this
-                    </span>
-                  ) : (
-                    <span className="plainvalue">
-                      {formatAmount(claimable, decimals)}
-                      <span className="plainvalue-unit">{symbol}</span>
-                    </span>
-                  )
-                ) : (
+                claimable === undefined ? (
                   <span className="small faint">
-                    not a stored value — accrued − claimed, both ciphertext
+                    accrued − claimed; decrypt both to derive it
+                  </span>
+                ) : (
+                  <span className="plainvalue">
+                    {formatAmount(claimable, decimals)}
+                    <span className="plainvalue-unit">{symbol}</span>
                   </span>
                 )
               }
-              note="Computed in your browser from two decrypted values"
+              note="Not a stored value — computed in your browser from two decrypted handles"
             />
           </div>
 
           <div className="grid-2">
             <div className="tile">
               <span className="tile-label">
-                Your salary rate <ModeBadge />
+                Your salary rate <CipherMark />
               </span>
               <ConfidentialValue
                 handle={rateHandle}
@@ -266,7 +257,7 @@ export function EmployeeView({ protocol }: { protocol: ProtocolInfo }) {
                 kind="rate"
                 auto
               />
-              {rate.stage === "done" && isPrivate && (
+              {rate.stage === "done" && (
                 <span className="tile-note mono">
                   {rate.value?.toString()} base units/second ×{" "}
                   {SECONDS_PER_MONTH.toString()} s/month
@@ -276,7 +267,7 @@ export function EmployeeView({ protocol }: { protocol: ProtocolInfo }) {
             <div className="tile">
               <span className="tile-label">
                 Wallet balance ({protocol.confidentialSymbol ?? `c${symbol}`}){" "}
-                <ModeBadge />
+                <CipherMark />
               </span>
               <ConfidentialValue
                 handle={balanceHandle}
@@ -292,7 +283,7 @@ export function EmployeeView({ protocol }: { protocol: ProtocolInfo }) {
 
           <div className="row">
             <Button
-              variant="mode"
+              variant="accent"
               loading={claimTx.isBusy}
               disabled={!protocol.hasStarted}
               onClick={() =>
@@ -404,12 +395,15 @@ export function EmployeeView({ protocol }: { protocol: ProtocolInfo }) {
   );
 }
 
-function ModeBadge() {
-  const { isPrivate } = useViewMode();
-  return isPrivate ? (
-    <UnlockIcon size={11} style={{ color: "var(--plain)" }} />
-  ) : (
-    <LockIcon size={11} style={{ color: "var(--cipher)" }} />
+/** Marks a figure whose on-chain representation is a handle, never a number. */
+function CipherMark() {
+  return (
+    <span
+      title="Stored on-chain as an euint256 handle"
+      style={{ display: "inline-flex", color: "var(--cipher)" }}
+    >
+      <LockIcon size={11} />
+    </span>
   );
 }
 
