@@ -52,8 +52,13 @@ export interface EncryptedAllocation {
 }
 
 /**
- * What an observer can see vs. what the employee can see. Drives the
- * public/private toggle in the UI, and the assertions in the e2e leak test.
+ * What an observer can see vs. what the employee can see.
+ *
+ * The UI renders both at once — each row shows the handle the chain stores
+ * beside whatever a real `decrypt()` returns for the connected account — and
+ * the e2e leak test asserts the same split: everything in `PublicView` must be
+ * readable from the chain, and nothing in `PrivateView` may appear anywhere in
+ * a log, a calldata field or a storage slot.
  */
 export interface PublicView {
   /** Aggregate stream total — visible, and meant to be. */

@@ -10,8 +10,10 @@ NoxStream exists; everything that composes with it keeps working.
 
 One public stream in. N encrypted salaries out.
 
-**▶ Live app: https://pranay123-stack.github.io/noxstream/** — connect a Sepolia
-wallet and flip the public/private toggle. It reads the live contracts listed below;
+**▶ Live app: https://pranay123-stack.github.io/noxstream/** — the roster is readable
+with no wallet at all, and every confidential value shows the 32-byte handle the chain
+stores next to whatever a real `decrypt()` returns for the account you connect. Some
+rows resolve to a salary; most refuse. It reads the live contracts listed below;
 nothing is simulated. A browser wallet (MetaMask or similar) is all you need.
 
 ---
@@ -143,7 +145,7 @@ Three tiers, in increasing order of cost. The first two need no key and no funds
 npm test          # unit (29) + Sablier fork (5) — the default, and what CI runs
 npm run test:unit # test/unit/*.test.ts   — needs Docker
 npm run test:fork # test/integration/fork-sablier.test.ts — needs a Sepolia RPC
-npm run test:e2e  # LIVE Sepolia — needs a deployment + two funded keys (NOT YET RUN)
+npm run test:e2e  # LIVE Sepolia — needs a deployment + two funded keys
 ```
 
 | Tier | File | What it actually proves |
@@ -151,7 +153,7 @@ npm run test:e2e  # LIVE Sepolia — needs a deployment + two funded keys (NOT Y
 | Confidential unit | [`test/unit/payroll.test.ts`](packages/contracts/test/unit/payroll.test.ts) | Real Nox stack in Docker: every encryption, TEE computation and ACL check is genuine. A third party's `decrypt` is **rejected**; the employee's own **succeeds** and returns the exact rate. Accrual is `rate × elapsed` to the second; a raise does not re-price seconds already worked; a revoked employee keeps what they earned; an over-claim clamps instead of reverting. |
 | Leak scanner | [`test/unit/leak-scanner.test.ts`](packages/contracts/test/unit/leak-scanner.test.ts) | Tests the leak detector itself, offline, in milliseconds, on every CI push. A scanner with a broken encoder reports "no leak" on a chain that is leaking everything — strictly worse than no test. It must find a salary word-aligned, minimal big-endian, little-endian and as decimal ASCII, and must **not** fire on a genuine Nox handle. |
 | Sablier fork | [`test/integration/fork-sablier.test.ts`](packages/contracts/test/integration/fork-sablier.test.ts) | EDR fork of Sepolia loading the **real 24,481-byte Sablier Lockup v4.0 runtime**. Last run created real stream id **167** — exactly `nextStreamId` read from the live chain, so the fork is real state. A **stranger** harvested 1,525,833 base units to the vault while their attempt to redirect the funds to themselves reverted `UnauthorizedDestination`; a dry fee tank reverted `InsufficientFeeTank`, and 1,937,546,420,382,988 wei from that same stranger unblocked it. |
-| Live e2e | [`test/integration/e2e-sepolia.test.ts`](packages/contracts/test/integration/e2e-sepolia.test.ts) | **Not yet run** — see below. |
+| Live e2e | [`test/integration/e2e-sepolia.test.ts`](packages/contracts/test/integration/e2e-sepolia.test.ts) | **8 passing** against the live Sepolia deployment and the live Nox gateway — the same assertions, no fork, no mock. Run log below. |
 
 ### What the leak test proves (and why it is the interesting one)
 
@@ -285,10 +287,20 @@ into a number:
 
 ```bash
 cast call 0x2c9A0F1A7312629BEc84AF345D1a8679c2D7d5A7 \
+  "employeeCount()(uint256)" \
+  --rpc-url https://ethereum-sepolia-rpc.publicnode.com
+# 3
+
+cast call 0x2c9A0F1A7312629BEc84AF345D1a8679c2D7d5A7 \
   "ratePerSecondOf(address)(bytes32)" 0x706480A5937BC0016397DcC92588c22D3cf69Fe5 \
   --rpc-url https://ethereum-sepolia-rpc.publicnode.com
 # 0x0000aa36a723013750084c48c56a85eaea33b121a75f15cef7677daa97dc1c9f
 ```
+
+The exact bytes change every time the employer rewrites that allocation — the point is
+that they are always *bytes*. Byte 0 is the version, bytes 1–4 the chain id, byte 5 the
+Solidity type, byte 6 whether it was a fresh encrypted input or computed in the TEE.
+That is the entire public surface; the remaining 25 bytes are an opaque digest.
 
 **3. The stream is a normal, unmodified Sablier stream.** Stream 167 on the live
 Sablier Lockup — NoxStream never touched the protocol:
@@ -306,7 +318,7 @@ keys in `packages/contracts/.env`:
 npm install
 npm test          # 29 unit (real Nox stack in Docker) + 5 Sablier fork
 npm run test:e2e  # the 8-test leak proof, against the live addresses above
-npm run dev       # the frontend, public/private toggle on the live deployment
+npm run dev       # the frontend, reading the live deployment above
 ```
 
 > **RPC note.** Use `https://ethereum-sepolia-rpc.publicnode.com` for
@@ -346,16 +358,50 @@ gateway), lists every path it searched, and disables every write path rather tha
 rendering a plausible-looking address that would fail later with reverts that look
 like our bugs.
 
-The headline control is the **Public view / Private view** switch in the masthead.
-Both render the *same* on-chain state:
+When one does exist, the masthead carries a live chip — *"● Live on Ethereum Sepolia ·
+registry 0x2c9A…d5A7"* — linking straight to that contract on Etherscan, so the
+address the build is actually reading is checkable from the chrome without trusting
+this file. (It is hidden below 980px.)
 
-- **Public view** — literally what any observer of Sepolia can read: roster
-  addresses, the aggregate stream, and a 32-byte handle where each salary should be.
-  Click any handle chip to expand all 32 bytes plus its decoded public structure
-  (`v1 · chain 11155111 · uint256 · encrypted input`).
-- **Private view** — the result of a real `decrypt()`, and only where the connected
-  account passed an on-chain `isViewer` check first. Rows you hold no grant on stay
-  ciphertext and say **Not authorised** — no signature is even requested for them.
+There is no view mode to select. Every confidential value renders **both of its faces
+at once** ([`ConfidentialValue.tsx`](packages/frontend/src/components/ConfidentialValue.tsx)),
+so the ciphertext and whatever you can read from it are on screen together:
+
+```
+[ 0x0000aa…1c9f ]  ->  4,999.96 mUSDC / month     this account holds an ACL grant
+[ 0x0000aa…8cf4 ]  ->  Not authorised             NoxCompute's ACL excludes it
+[ 0x0000aa…fee9 ]  ->  [ Decrypt ]                nothing has been attempted yet
+```
+
+- **The handle is always there, at full strength.** It is genuinely all the chain
+  stores. Click any chip to expand all 32 bytes plus the public structure decoded out
+  of them — `v0 · chain 11155111 · uint256 · encrypted input`. Public structure,
+  private value.
+- **What follows the arrow is decided by NoxCompute, not by this app.** An on-chain
+  `isViewer(handle, you)` read runs first
+  ([`DecryptionProvider.tsx`](packages/frontend/src/nox/DecryptionProvider.tsx)); a
+  row the access list excludes never asks for a signature and never reaches the
+  gateway. Where the check passes, the number is the result of a real `decrypt()`
+  after one gasless EIP-712 signature.
+- **Nothing decrypts until you ask** — except your own row, which auto-requests
+  because it is yours. The roster carries a *"Decrypt everything I am allowed to see"*
+  button precisely so the refusals are visible next to the successes.
+
+That side-by-side contrast is the demonstration: an authorised row and an unauthorised
+row, same table, same screen, same instant. It says nothing that the privacy table
+above does not already concede — the addresses and the aggregate stay public, and a
+refused row proves confidentiality, not anonymity.
+
+The live deployment's roster carries three employees, seeded by
+[`scripts/seed-roster.ts`](packages/contracts/scripts/seed-roster.ts). Two of them are
+addresses whose private keys were generated during seeding and immediately discarded,
+so nobody holds them: those rows are permanently unreadable to every account except
+the employer, which holds a deliberate audit grant on every rate
+(`Nox.allow(rate, _employer)` in
+[`NoxPayrollRegistry.sol`](packages/contracts/contracts/NoxPayrollRegistry.sol) —
+an employer that cannot read back what it wrote cannot audit its own payroll).
+Connect as the employer and everything opens; connect as an employee and exactly one
+row does.
 
 Demo storyboard with the exact click path: [`docs/DEMO.md`](docs/DEMO.md).
 
@@ -374,12 +420,13 @@ packages/
       interfaces/                   the coordination contract between workstreams
       mocks/                        MockUSDC, MockSablierLockup (local chain only)
     scripts/deploy.ts               idempotent deploy → DeploymentRecord JSON
+    scripts/seed-roster.ts          adds colleagues whose keys are generated and discarded
     test/unit/                      real Nox stack (Docker) + offline leak-scanner tests
     test/integration/               Sepolia fork (real Sablier) + live Sepolia e2e
     test/utils/leak-scan.ts         the plaintext-leak detector
   shared/                 Nox constants, DeploymentRecord type, deployment records
   frontend/               React 19 + Vite 7 + wagmi + RainbowKit
-    src/components/ConfidentialValue.tsx   the public/private rendering of one value
+    src/components/ConfidentialValue.tsx   one value, showing handle and plaintext together
     src/nox/DecryptionProvider.tsx         isViewer → wait → one signature → decrypt
 docs/
   ARCHITECTURE.md         the design and the honest privacy model

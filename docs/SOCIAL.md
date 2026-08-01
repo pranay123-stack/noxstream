@@ -1,24 +1,29 @@
 # Launch post — DRAFT
 
 > **This is a draft for the repo owner to post. Nothing here has been published
-> anywhere.** Fill the two placeholders, check the claims against reality at the
+> anywhere.** Fill the placeholder, check the claims against reality at the
 > moment of posting, then post it yourself.
 
 **Placeholders to fill before posting**
 
 | Placeholder | What goes there |
 |---|---|
-| `https://github.com/pranay123-stack/noxstream` | the public GitHub URL |
 | `<VIDEO_URL>` | the demo recording (or attach the video natively — native video outperforms a link) |
+
+The repo URL (https://github.com/pranay123-stack/noxstream) and the live app URL
+(https://pranay123-stack.github.io/noxstream/) are real and already in every variant.
 
 **Check before you post — every claim below must still be true**
 
 - [ ] Repo is public and the README renders.
 - [ ] `npm test` still passes on a clean clone (29 unit + 5 fork).
-- [ ] The demo video shows what the copy says it shows.
-- [ ] **If the Sepolia deploy has not happened, do not imply it has.** No variant
-      below claims a live deployment; keep it that way, or add the addresses once
-      they exist.
+- [ ] The demo video shows what the copy says it shows. **In particular: no variant
+      below mentions a public/private toggle, because the app no longer has one.** The
+      shot is one roster table where an authorised row and two unauthorised rows sit
+      side by side, handles visible on all three.
+- [ ] The Sepolia deployment is live and the live-e2e tier has been run (8 passing), so
+      the variants below may say so. If either stops being true, cut the claim rather
+      than softening it.
 - [ ] Handle is `@iEx_ec`. Tag Sablier (`@Sablier`) only in the thread, where there
       is room to be specific — a tag with no substance is spam.
 
@@ -33,32 +38,42 @@
 > stream funds the company — auditable, composable, unchanged. Every individual
 > salary lives in @iEx_ec Nox as an encrypted handle.
 >
-> Same screen, one switch, both truths 👇
+> One roster. One screen. Three encrypted handles — and only the row you hold a grant
+> on turns into a number.
 >
 > <VIDEO_URL>
 > https://github.com/pranay123-stack/noxstream
 > Live: https://pranay123-stack.github.io/noxstream/
 
-*Notes:* leads with the insight, not the tech. The video does the selling. Under 280
-characters with both links.
+*Notes:* leads with the insight, not the tech. The video does the selling. As written
+it is ~450 characters — fine for X Premium, LinkedIn or Farcaster. For a plain 280-char
+post, cut the middle paragraph and attach the video natively instead of linking it: X
+counts every URL as 23 characters, and one link plus the two remaining paragraphs lands
+around 268.
 
 ---
 
 ## Variant B — the money-shot post (single post, video-first)
 
-> Same contract. Same storage slots. Two readers.
+> Three rows of one payroll table, read by one wallet:
 >
-> Left: what anyone reading Sepolia sees — a 32-byte handle where each salary should
-> be. Right: what one authorised account sees after a single gasless signature.
+> 0x0000aa…1c9f → 4,999.96 mUSDC / month
+> 0x0000aa…8cf4 → Not authorised
+> 0x0000aa…fee9 → Not authorised
 >
-> Confidential payroll streaming on @iEx_ec Nox. No fork of Sablier required.
+> The handle is on screen for all three. Only one becomes a number, and @iEx_ec Nox
+> decides which — not our UI. No fork of Sablier required.
 >
+> <VIDEO_URL>
 > https://github.com/pranay123-stack/noxstream
 > Live: https://pranay123-stack.github.io/noxstream/
 
-*Notes:* use this one if the video opens on the Public/Private toggle. "Left / right"
-assumes a side-by-side cut; change to "before / after the switch" if the recording is
-a straight toggle.
+*Notes:* the contrast lives inside a single frame now, so this works with a still as
+well as a video — no cut, no before/after, nothing the viewer has to hold in memory.
+Two of those locked rows belong to addresses whose private keys were generated during
+seeding and discarded, which is worth saying in a reply if anyone asks whether it is
+staged. Handles are illustrative of the shape; paste the real ones out of the recording
+so they match the frame.
 
 ---
 
@@ -69,7 +84,9 @@ a straight toggle.
 > can read what each person earns and reconstruct a company's whole comp band from
 > one stream list.
 >
-> NoxStream closes it without touching the streaming protocol. Here is how. 🧵
+> NoxStream closes it without touching the streaming protocol. In the video: one
+> roster table, three encrypted handles, and only the row this wallet holds a grant
+> on turns into a number. Here is how. 🧵
 >
 > <VIDEO_URL>
 
@@ -101,8 +118,10 @@ a straight toggle.
 > · a third party's decrypt must FAIL; the employee's must succeed with the exact
 >   number
 >
-> 29 unit tests against a real Nox stack in Docker, plus 5 against real, unmodified
-> Sablier Lockup v4.0 bytecode on a Sepolia fork.
+> 42 tests in three tiers: 19 against a real Nox stack in Docker, 10 testing the
+> scanner itself offline, 5 against real unmodified Sablier Lockup v4.0 bytecode on a
+> Sepolia fork, and 8 against the live Sepolia deployment — where the scan came back
+> clean across 264 hex fields in 5 transactions and 144 storage words in 3 contracts.
 
 **5/**
 > Stated plainly, because overclaiming here would be easy: Nox gives
@@ -116,7 +135,9 @@ a straight toggle.
 
 *Notes:* post 5 is the one that earns trust with people who actually read code, and
 it is also the post most likely to get a reply from the iExec team — engineers
-respond to honest limits.
+respond to honest limits. Posts 1 and 4 run past 280 characters; either use X Premium
+or split post 4 at the blank line, keeping the falsification bullets and the test
+counts as separate posts.
 
 ---
 
@@ -129,10 +150,14 @@ the wrong kind.
 
 ## Tone guardrails applied
 
-- No numbers that were not measured. The only figures used are test counts and the
-  Sablier release version, both verifiable in the repo.
-- No claims of a live deployment while `packages/shared/src/deployments/sepolia.json`
-  does not exist.
+- No numbers that were not measured. The only figures used are test counts, the leak
+  scan's field and slot counts, and the Sablier release version — all verifiable in the
+  repo and in the live run log in the README.
+- The deployment record `packages/shared/src/deployments/sepolia.json` exists and the
+  addresses in it are live, so "live on Sepolia" is now sayable. It was not before, and
+  nothing here should outrun the file again.
+- No control is described that the app does not have. The public/private toggle was
+  removed; the proof is the per-row contrast, and the copy says only that.
 - No "revolutionary", no "game-changing", no implied endorsement by iExec or Sablier.
 - The limitation (confidentiality ≠ anonymity) is in the thread rather than buried,
   because the audience that matters will check.
