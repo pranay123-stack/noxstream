@@ -1,0 +1,27 @@
+{
+  "chainId": 11155111,
+  "deployedAt": "2026-08-01T03:34:30.016Z",
+  "deployer": "0x3ffbfb0f37c2a1b68ea5c1ccc9d8929bf08d89f0",
+  "contracts": {
+    "payrollRegistry": "0x2c9A0F1A7312629BEc84AF345D1a8679c2D7d5A7",
+    "noxStreamPayroll": "0x5e3D251d3C21Be4DF14b0A69298D6DC9f4A974af",
+    "confidentialPayoutToken": "0x15bD3F2b7155f669eeFEB8D40EcA4D449922Ed65",
+    "streamAdapter": "0x3487141A7A445340a04D8c744cb7d9BD5346C40b",
+    "payoutAsset": "0x14d62dCf1F6568Db8639b8366592489369aF16B9"
+  },
+  "nox": {
+    "noxComputeAddress": "0x24Ef36Ec5b626D7DCD09a98F3083c2758F0F77bF",
+    "handleGatewayUrl": "https://gateway-testnets.noxprotocol.dev"
+  },
+  "streamProtocol": "sablier-lockup-linear-v4.0",
+  "txHashes": {
+    "payoutAsset": "0x1b22d0ef90b36548bb7c5903df38ecf5279fbced004126e6b0bf58897f6ab2e7",
+    "mintMockUSDC:0x3ffbfb0f37c2a1b68ea5c1ccc9d8929bf08d89f0": "0x16b3b768fed91934313556fe69a22fabc13f3c9159f2514c01b3fbb80b17ca7f",
+    "confidentialPayoutToken": "0x0eecc749b3c143acf5408774bda4d73aea1bc20f0b97ea543f016fbe1228eb76",
+    "streamAdapter": "0xc664d8db663e4f6d371a7e407c4ddbcfd0b0fa9c9bc36a6009de258dd0816ba3",
+    "payrollRegistry": "0x837d2a7d484315c4cbcfac9255b951ab8215eb25e8f0a5b9c7674b2bafb23bb4",
+    "noxStreamPayroll": "0x5994a641e9f2f349e726fd353cb23cfd79a39db59f68c49a3e4d0e3d878746a3",
+    "registry.setPayroll": "0x6f9ce082bb6aee5d8b149063693aeaca3b6cc56e544025a498e5949b0113358a",
+    "payroll.start": "0xeb27a70203f503cfb07dcb73e420e99461d0469a717dfddafda86c2af3336ef7"
+  }
+}

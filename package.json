@@ -1,0 +1,38 @@
+{
+  "name": "noxstream",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NoxStream — confidential payroll streaming on iExec Nox. One public aggregate stream, N encrypted salaries.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "packages/shared",
+    "packages/contracts",
+    "packages/frontend"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace @noxstream/contracts && npm run build --workspace @noxstream/frontend",
+    "compile": "npm run compile --workspace @noxstream/contracts",
+    "deploy": "npm run deploy:sepolia --workspace @noxstream/contracts",
+    "deploy:dry": "npm run deploy:dry --workspace @noxstream/contracts",
+    "dev": "npm run dev --workspace @noxstream/frontend",
+    "test": "npm run test --workspace @noxstream/contracts",
+    "test:unit": "npm run test:unit --workspace @noxstream/contracts",
+    "test:fork": "npm run test:fork --workspace @noxstream/contracts",
+    "test:e2e": "npm run test:e2e --workspace @noxstream/contracts",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "//overrides": "npm only honours `overrides` from the ROOT of a workspace install, so these must be duplicated here even though packages/contracts declares them too (which keeps a standalone install of that package working).",
+  "overrides": {
+    "@nomicfoundation/hardhat-node-test-runner": "3.0.9",
+    "@sablier/lockup": {
+      "@openzeppelin/contracts": "^5.6.1"
+    },
+    "@sablier/evm-utils": {
+      "@openzeppelin/contracts": "^5.6.1"
+    }
+  }
+}

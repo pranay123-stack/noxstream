@@ -1,0 +1,178 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_sepolia_e2e:
+        description: "Also run the LIVE Sepolia end-to-end test (needs funded keys in secrets)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Hardhat 3 requires Node 22+.
+  NODE_VERSION: "22"
+
+jobs:
+  # --------------------------------------------------------------------------
+  # Always runs. Needs no keys, no funds and no network beyond npm.
+  # --------------------------------------------------------------------------
+  build-and-unit:
+    name: Build + offline unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      # The root .npmrc sets ignore-scripts=true: @sablier/evm-utils ships a
+      # postinstall that aborts a clean install. We only consume Sablier's
+      # Solidity sources, which need no build step.
+      - name: Install
+        run: npm install
+
+      - name: Compile contracts
+        run: npm run compile
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # These are the leak-scanner's own tests. They touch no chain and no
+      # Docker, so they gate every push: if the tool that proves "no plaintext
+      # leaked" stops working, every privacy claim downstream becomes vacuous.
+      - name: Leak-scanner unit tests
+        working-directory: packages/contracts
+        run: npx hardhat test test/unit/leak-scanner.test.ts
+
+  # --------------------------------------------------------------------------
+  # Real Nox: the plugin boots the offchain stack in Docker. No keys, no funds.
+  # This is the primary evidence that the confidential logic works.
+  # --------------------------------------------------------------------------
+  nox-unit:
+    name: Confidential unit tests (local Nox stack in Docker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install
+        run: npm install
+
+      # GitHub's ubuntu-latest runners ship Docker and Compose v2 already; this
+      # just fails fast and legibly if that ever changes.
+      - name: Check Docker
+        run: docker version && docker compose version
+
+      - name: Unit tests against the real Nox stack
+        working-directory: packages/contracts
+        run: npx hardhat test test/unit/payroll.test.ts
+
+      - name: Nox stack logs on failure
+        if: failure()
+        run: docker ps -a && docker compose ls || true
+
+  # --------------------------------------------------------------------------
+  # Real, unmodified Sablier Lockup v4.0 — on a Sepolia fork, so no funded key.
+  # Allowed to fail the job only if the public RPC is unavailable; a genuine
+  # contract regression still fails.
+  # --------------------------------------------------------------------------
+  sablier-fork:
+    name: Sablier integration (Sepolia fork)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install
+        run: npm install
+
+      - name: Fork Sepolia and exercise real Sablier
+        working-directory: packages/contracts
+        env:
+          # A dedicated archive endpoint is more reliable than the public
+          # default; the test falls back to sepolia.drpc.org when unset.
+          FORK_RPC: ${{ secrets.SEPOLIA_RPC_URL }}
+        run: npx hardhat test test/integration/fork-sablier.test.ts
+
+  # --------------------------------------------------------------------------
+  # LIVE Sepolia. Gated twice over: manual dispatch AND a funded-key secret.
+  # Never runs on a push, so CI never needs money.
+  # --------------------------------------------------------------------------
+  sepolia-e2e:
+    name: LIVE Sepolia end-to-end (manual)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      inputs.run_sepolia_e2e
+    environment: sepolia
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install
+        run: npm install
+
+      - name: Refuse to run without funded keys
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          EMPLOYEE_PRIVATE_KEY: ${{ secrets.EMPLOYEE_PRIVATE_KEY }}
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+        run: |
+          missing=""
+          [ -n "$SEPOLIA_RPC_URL" ]      || missing="$missing SEPOLIA_RPC_URL"
+          [ -n "$DEPLOYER_PRIVATE_KEY" ] || missing="$missing DEPLOYER_PRIVATE_KEY"
+          [ -n "$EMPLOYEE_PRIVATE_KEY" ] || missing="$missing EMPLOYEE_PRIVATE_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing"
+            echo "Set them in the 'sepolia' environment. Nothing was broadcast."
+            exit 1
+          fi
+
+      # Idempotent: reuses packages/shared/src/deployments/sepolia.json when the
+      # recorded contracts still have code on chain.
+      - name: Deploy (idempotent)
+        working-directory: packages/contracts
+        env:
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+        run: npx hardhat run scripts/deploy.ts --network sepolia
+
+      - name: End-to-end + no-plaintext-leak proof
+        working-directory: packages/contracts
+        env:
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          EMPLOYEE_PRIVATE_KEY: ${{ secrets.EMPLOYEE_PRIVATE_KEY }}
+        run: npx hardhat test test/integration/e2e-sepolia.test.ts --network sepolia
+
+      - name: Upload the deployment record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sepolia-deployment
+          path: packages/shared/src/deployments/sepolia.json
+          if-no-files-found: warn

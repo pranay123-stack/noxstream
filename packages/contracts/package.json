@@ -1,0 +1,49 @@
+{
+  "name": "@noxstream/contracts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NoxStream confidential payroll \u2014 Nox confidential smart contracts",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "hardhat compile",
+    "compile": "hardhat compile",
+    "//test": "Default = everything that needs no funded key. `test:unit` boots the Nox Docker stack; `test:fork` forks Sepolia for real Sablier.",
+    "test": "npm run test:unit && npm run test:fork",
+    "test:unit": "hardhat test test/unit/*.test.ts",
+    "test:local": "hardhat test test/unit/*.test.ts",
+    "test:fork": "hardhat test test/integration/fork-sablier.test.ts",
+    "test:e2e": "hardhat test test/integration/e2e-sepolia.test.ts --network sepolia",
+    "deploy:sepolia": "hardhat run scripts/deploy.ts --network sepolia",
+    "deploy:dry": "DRY_RUN=1 hardhat run scripts/deploy.ts --network sepolia",
+    "deploy:local": "DEPLOY_NETWORK=default hardhat run scripts/deploy.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@iexec-nox/handle": "^0.1.0-beta.13",
+    "@iexec-nox/nox-confidential-contracts": "^0.2.2",
+    "@iexec-nox/nox-protocol-contracts": "^0.2.4",
+    "@openzeppelin/contracts": "^5.6.1",
+    "@sablier/lockup": "4.0.1",
+    "dotenv": "^17.2.3",
+    "viem": "^2.46.3"
+  },
+  "devDependencies": {
+    "@iexec-nox/nox-hardhat-plugin": "^0.2.0",
+    "@nomicfoundation/hardhat-toolbox-viem": "^5.0.3",
+    "@tsconfig/node22": "^22.0.2",
+    "@types/node": "^22.11.0",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.4",
+    "hardhat": "^3.4.0",
+    "typescript": "~5.8.0"
+  },
+  "overrides": {
+    "@nomicfoundation/hardhat-node-test-runner": "3.0.9",
+    "@sablier/lockup": {
+      "@openzeppelin/contracts": "$@openzeppelin/contracts"
+    },
+    "@sablier/evm-utils": {
+      "@openzeppelin/contracts": "$@openzeppelin/contracts"
+    }
+  }
+}

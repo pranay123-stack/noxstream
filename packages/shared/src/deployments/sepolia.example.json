@@ -1,0 +1,49 @@
+{
+  "_comment": [
+    "SHAPE REFERENCE ONLY — every address below is the zero address on purpose.",
+    "The real file is packages/shared/src/deployments/sepolia.json, written by",
+    "`npm run deploy` (packages/contracts/scripts/deploy.ts) from the addresses",
+    "and transaction hashes of an actual broadcast. It is deliberately absent",
+    "from the repo until someone with a funded Sepolia key runs that deploy —",
+    "inventing one would mean shipping addresses that point at nothing.",
+    "",
+    "Consumers (the frontend, test/integration/e2e-sepolia.test.ts) must treat",
+    "its absence as 'not deployed yet' and say so, not fall back to placeholders.",
+    "This file exists so they can be written and typechecked before the deploy",
+    "happens; it must never be imported at runtime.",
+    "",
+    "The type is `DeploymentRecord` in packages/shared/src/types.ts."
+  ],
+
+  "chainId": 11155111,
+  "deployedAt": "1970-01-01T00:00:00.000Z",
+  "deployer": "0x0000000000000000000000000000000000000000",
+
+  "contracts": {
+    "_comment": "Deployed in this order; the payroll constructor reads adapter.asset() and registry.employer(), so both must exist first.",
+    "payoutAsset": "0x0000000000000000000000000000000000000000",
+    "confidentialPayoutToken": "0x0000000000000000000000000000000000000000",
+    "streamAdapter": "0x0000000000000000000000000000000000000000",
+    "payrollRegistry": "0x0000000000000000000000000000000000000000",
+    "noxStreamPayroll": "0x0000000000000000000000000000000000000000"
+  },
+
+  "nox": {
+    "_comment": "Taken from nox.connect(), never hardcoded by the deploy script. These are the live Ethereum Sepolia values.",
+    "noxComputeAddress": "0x24Ef36Ec5b626D7DCD09a98F3083c2758F0F77bF",
+    "handleGatewayUrl": "https://gateway-testnets.noxprotocol.dev"
+  },
+
+  "streamProtocol": "sablier-lockup-linear-v4.0",
+
+  "txHashes": {
+    "_comment": "One entry per broadcast transaction, keyed by step. The exact key set depends on the run: `payoutAsset` and `mintMockUSDC:<addr>` are absent when PAYOUT_ASSET_ADDRESS supplies a real ERC-20.",
+    "payoutAsset": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "confidentialPayoutToken": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "streamAdapter": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "payrollRegistry": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "noxStreamPayroll": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "registry.setPayroll": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "payroll.start": "0x0000000000000000000000000000000000000000000000000000000000000000"
+  }
+}

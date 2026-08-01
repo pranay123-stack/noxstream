@@ -1,0 +1,22 @@
+{
+  "name": "@noxstream/shared",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NoxStream shared types, Nox network constants and deployment records",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./deployments/*": "./src/deployments/*"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.2",
+    "@types/node": "^22.11.0",
+    "typescript": "~5.8.0"
+  }
+}

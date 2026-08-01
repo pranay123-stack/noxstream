@@ -1,0 +1,26 @@
+node_modules/
+dist/
+build/
+artifacts/
+cache/
+types/
+.env
+.env.local
+*.log
+.DS_Store
+
+# Reference clones of the upstream iExec repos — research inputs, not our code.
+_ref-starter/
+_ref-plugin/
+
+# Frontend
+.next/
+.vite/
+packages/frontend/dist/
+
+# Local/ephemeral deployment records. `sepolia.json` is a real artifact and IS
+# committed once a deploy has happened; `sepolia.example.json` documents the
+# shape in the meantime. Anything else is a throwaway local chain.
+packages/shared/src/deployments/*.json
+!packages/shared/src/deployments/sepolia.json
+!packages/shared/src/deployments/sepolia.example.json
