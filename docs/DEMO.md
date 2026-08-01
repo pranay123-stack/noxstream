@@ -13,20 +13,34 @@ decrypted at all, no matter who is watching.
 
 ## Before you record
 
-**Blocking prerequisite: the contracts are not yet deployed to Sepolia.** Run
-`npm run deploy` first (see [README](../README.md#deploy)). Until
-`packages/shared/src/deployments/sepolia.json` exists, the app renders the
-[`NotDeployed`](../packages/frontend/src/components/NotDeployed.tsx) panel and every
-write button is disabled — honest, but not a demo.
+**Already done: the contracts are live on Sepolia** (deployed 2026-08-01, addresses
+in the [README](../README.md#live-addresses)) and the record is committed, so both
+the hosted app and a local `npm run dev` pick them up automatically.
+
+Record against whichever you prefer:
+- **Hosted** — <https://pranay123-stack.github.io/noxstream/> (nothing to install)
+- **Local** — `npm run dev`
 
 Checklist:
 
-1. `npm run deploy`, then confirm the app no longer shows "No deployment record found".
-2. **Two wallets in the browser**, both funded with Sepolia ETH:
-   - **A — employer**: the deploying account (it is `registry.employer()`).
-   - **B — employee**: any second account; it will be on the roster.
-   Have a third address to hand (any address you do **not** control) for the third
-   roster row — that is the one that stays locked in the money shot.
+1. **Two accounts in MetaMask, on Sepolia.** The demo will not work with arbitrary
+   accounts: the employee's ability to decrypt comes from an **on-chain ACL grant**
+   held by one specific address. Import both burner keys from
+   `packages/contracts/.env` (MetaMask → Account menu → *Import account* → paste the
+   private key). They are already funded and already wired:
+
+   | Role | Address | Balance | State |
+   |---|---|---|---|
+   | **A — employer** | `0x3FfbfB0F37c2A1B68eA5c1cCC9d8929BF08d89f0` | ~0.030 ETH | is `registry.employer()` |
+   | **B — employee** | `0x706480A5937BC0016397DcC92588c22D3cf69Fe5` | ~0.007 ETH | on the roster, holds a live rate handle |
+
+   These keys are testnet burners and hold nothing else — but they are still private
+   keys. Read them from your local `.env`; never paste them into a browser, a chat, or
+   anything on screen while recording.
+
+   Have a **third address you do not control** to hand for an extra roster row — that
+   is the one that stays locked in the money shot. Any address works; it needs no
+   funds and no key, because the whole point is that you cannot decrypt it.
 3. Mint test tokens: Employer tab → **Aggregate stream** → **Mint 100,000 test mUSDC**.
 4. **Do a full warm-up pass off camera.** Handle resolution on the shared Nox gateway
    routinely takes tens of seconds. [`DecryptionProvider`](../packages/frontend/src/nox/DecryptionProvider.tsx)
