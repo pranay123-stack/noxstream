@@ -8,7 +8,7 @@
 
 | Placeholder | What goes there |
 |---|---|
-| `<REPO_URL>` | the public GitHub URL |
+| `https://github.com/pranay123-stack/noxstream` | the public GitHub URL |
 | `<VIDEO_URL>` | the demo recording (or attach the video natively — native video outperforms a link) |
 
 **Check before you post — every claim below must still be true**
@@ -36,7 +36,7 @@
 > Same screen, one switch, both truths 👇
 >
 > <VIDEO_URL>
-> <REPO_URL>
+> https://github.com/pranay123-stack/noxstream
 
 *Notes:* leads with the insight, not the tech. The video does the selling. Under 280
 characters with both links.
@@ -52,7 +52,7 @@ characters with both links.
 >
 > Confidential payroll streaming on @iEx_ec Nox. No fork of Sablier required.
 >
-> <REPO_URL>
+> https://github.com/pranay123-stack/noxstream
 
 *Notes:* use this one if the video opens on the Public/Private toggle. "Left / right"
 assumes a side-by-side cut; change to "before / after the switch" if the recording is
@@ -109,7 +109,7 @@ a straight toggle.
 >
 > MIT, and the feedback we owe @iEx_ec is in the repo.
 >
-> <REPO_URL>
+> https://github.com/pranay123-stack/noxstream
 
 *Notes:* post 5 is the one that earns trust with people who actually read code, and
 it is also the post most likely to get a reply from the iExec team — engineers
